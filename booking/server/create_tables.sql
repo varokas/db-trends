@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS `config` (
+   k VARCHAR(200) NOT NULL,
+   v VARCHAR(200) NOT NULL,
+   PRIMARY KEY ( k )
+);
+
+CREATE TABLE IF NOT EXISTS `booking` (
+   id INT NOT NULL AUTO_INCREMENT,
+   round VARCHAR(100) NOT NULL,
+   seat VARCHAR(40) NOT NULL,
+   owner VARCHAR(100) NULL,
+   counter INT NULL,
+   `updated` TIMESTAMP NULL,
+   PRIMARY KEY ( id )
+);

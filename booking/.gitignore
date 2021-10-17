@@ -1,0 +1,4 @@
+function.zip
+node_modules/
+.parcel-cache/
+dist/

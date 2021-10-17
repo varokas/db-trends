@@ -1,0 +1,22 @@
+{
+  "name": "booking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lambda-api": "^0.11.1",
+    "lodash": "^4.17.21",
+    "mariadb": "^2.5.4",
+    "nanoid": "^3.1.30"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1009.0",
+    "lambda-proxy-server": "0.0.3",
+    "nodemon": "^2.0.13"
+  }
+}

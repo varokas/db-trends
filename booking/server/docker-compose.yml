@@ -1,0 +1,38 @@
+version: '3.1'
+
+services:
+  db:
+    image: mariadb:10.5
+    restart: always
+    environment:
+      MARIADB_DATABASE: bookings
+      MYSQL_ROOT_PASSWORD: root_password
+  # lambda:
+  #   image: lambci/lambda:nodejs12.x
+  #   environment:
+  #     - "DB_HOST=db"
+  #     - "DB_USER=root"
+  #     - "DB_PASSWORD=root_password"
+  #     - "LAMBDA_PATH=/home/node/app/index"
+  #     - DOCKER_LAMBDA_STAY_OPEN=1
+  #   ports: 
+  #     - 9001:9001
+  #   volumes:
+  #     - .:/var/task:ro,delegated
+  #   command: index.handler
+  lambdaProxy:
+    image: node:12-alpine
+    working_dir: /home/node/app
+    environment:
+      - "DB_NAME=bookings"
+      - "DB_HOST=db"
+      - "DB_USER=root"
+      - "DB_PASSWORD=root_password"
+      - "LAMBDA_PATH=/home/node/app/index"
+      - "LAMBDA_FUNC=handler"
+      - "PROXY_PORT=3000"
+    volumes:
+      - .:/home/node/app
+    ports:
+      - "3000:3000"
+    command: "npx nodemon run.js"

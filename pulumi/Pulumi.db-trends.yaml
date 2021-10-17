@@ -1,0 +1,9 @@
+config:
+  aws:profile: varokas
+  aws:region: us-west-2
+  cloudflare:apiToken:
+    secure: AAABAJG1tENbGP/ambpmjlftEyNQm6ZZXy2nJAJSLsSIuIa00zrfizvbxEa/OI/oZlzdfDzSy4cvWNXxgAPLZ4WkhJ1OgF9U
+  db-trends:dbPassword:
+    secure: AAABAITR7FWMHA54ukLPpXtbkxjlQqZayNT5ZrN44sbNg1X1zWket248zKvl5pkJmZ+pqkUG
+  db-trends:dbUsername:
+    secure: AAABAIeLih2tEpx6MyYRwzE2+n07S87sc2RMUo0/T15OuLoHM7I=
