@@ -15,6 +15,8 @@ const locustEC2Size = "t4g.nano";     // t2.micro is available in the AWS free t
 const arch = "arm64" //x86_64
 const locustServersCount = 1
 
+const admins = ["tawan", "pongsakorn", "thanat"]
+
 const config = new pulumi.Config("db-trends");
 const dbUsername = config.requireSecret("dbUsername");
 const dbPassword = config.requireSecret("dbPassword");
@@ -23,6 +25,27 @@ const dbPassword = config.requireSecret("dbPassword");
 const dbTrendsPubKey = new aws.ec2.KeyPair("dbtrends", {
   publicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2nyFlMof+eiLZywFBOY9fzHN+B/tyBAqkQfngeYLblKlN8yI64C7CpufMGWHz+QLhWtipR4MP66aBML433cG/pqgZ7ZegTAPJzV1CBO+qJ3qKsTh7HSYIFtZOo6KIrd2eSWrcbXtpMNRDDHhPy1G1gczGZFUrCTG8V0ky9p8nL6Z0fDYLyFAX5Egc7pvCO5Bx/LqW/ap8YDUi9mzafYWjE7wLUNAeBzOSXDOnWdJuEmgeKo7IZ/Rfl0hXwb0r/CCSY60gmlAqo9zQj8t6ew8WS6BgR5lrFfr7u2pdtVdCCGp1KoAWu1Jh03hnDxbd7KMbFUtTE4UjyZArrt43iD3D6EARBEyGLlurwJoawxgSvHz1xojU80cEC/M/XtpN6k2QwXxJC5RMW+dL1PA3C9/tpBoMfpNEuSoA1/Vnse1D0YwGnDeJVszo1RNOx+kQ+4gpvnDN8KglHalGPt7Jz8RJLZ9nKjK/M9Vq7XprRLb2ZQ6B/cA5Y3bFFqulcxLasyc=",
 });
+
+// Users 
+const adminGroup = new aws.iam.Group("admins", {
+  path: "/admin/",
+});
+new aws.iam.GroupPolicyAttachment("admins", {
+  group: adminGroup.name,
+  policyArn: "arn:aws:iam::aws:policy/AdministratorAccess",
+});
+admins.map( name => { 
+  let user = new aws.iam.User(`user-${name}`, {
+    path: "/admin/",
+    forceDestroy: true,
+  })
+  const userGroupMemership = new aws.iam.UserGroupMembership(`userGroupMemership-${name}`, {
+      user: user.name,
+      groups: [adminGroup.name],
+  })
+});
+
+//export const password = exampleUserLoginProfile.encryptedPassword;
 
 // EIPs & DNS
 // const locustIPs = range(locustServersCount).map( i => new aws.ec2.Eip(`locust-${i}`));
@@ -130,17 +153,31 @@ const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{
 }
 `});
 
-// const getBooking = new aws.lambda.Function("getBooking", {
-//   code: new pulumi.asset.AssetArchive({
-//     "booking.py": new pulumi.asset.FileAsset("../booking.py"),
-//   }),
-//   role: iamForLambda.arn,
-//   handler: "booking.get_booking",
-//   runtime: "python3.8",
-//   environment: {
-//       variables: {
-//           foo: "bar",
-//       },
-//   },
+const bookingLambda = new aws.lambda.Function("getBooking", {
+  code: new pulumi.asset.FileArchive("../booking/server/dist/function.zip"),
+  role: iamForLambda.arn,
+  handler: "index.handler",
+  runtime: aws.lambda.NodeJS12dXRuntime,
+  environment: {
+      variables: {
+        DB_NAME: "bar",
+        DB_HOST: "localhost",
+        DB_USER: dbUsername,
+        DB_PASSWORD: dbPassword,
+      },
+  },
+});
+
+// const bookingEndpoint = new awsx.apigateway.API("hello-world", {
+//   routes: [
+//     {
+//       path: "/{route+}",
+//       method: "ANY",
+//       // Functions can be imported from other modules
+//       eventHandler: bookingLambda 
+//     },
+//   ],
 // });
 
+///// EXPORTS /////
+// export const bookingURL = bookingEndpoint.url
