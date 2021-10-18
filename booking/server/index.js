@@ -9,10 +9,10 @@ const _ = require('lodash');
 const { nanoid } = require('nanoid')
 
 const pool = mariadb.createPool({
-  database: process.env.DB_NAME, 
-  host: process.env.DB_HOST, 
-  user: process.env.DB_USER, 
-  password: process.env.DB_PASSWORD, 
+  database: process.env.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   connectionLimit: 5,
   multipleStatements: true
 });
@@ -21,12 +21,12 @@ const api = require('lambda-api')();
 
 // Create Tables (not forced sync)
 fs.readFile("create_tables.sql", 'utf8')
-  .then( createTable => executeQuery(createTable))
-  .catch( err => console.log(err) )
+  .then(createTable => executeQuery(createTable))
+  .catch(err => console.log(err))
 
 ///////// ROUTES ////////////
 api.get('/', async (req, res) => {
-  res.header('content-type','text/html').send('<div>This is HTML</div>')
+  res.header('content-type', 'text/html').send('<div>This is HTML</div>')
 });
 
 api.get('/api/booking', async (req, res) => {
@@ -49,25 +49,25 @@ api.get('/api/booking/owners', async (req, res) => {
 
 /*
  {
-	"seat": "A0001",
+  "seat": "A0001",
   "name": "abc",
-	"counter": 5
+  "counter": 5
 } 
  */
 api.post('/api/makeBooking', async (req, res) => {
   var round = await getCurrentRound()
 
   const seat = req.body.seat
-  const name = req.body.name
+  const name = req.body.owner
   const newCounter = req.body.counter
 
-  result = await execute( async(conn) => {
+  result = await execute(async (conn) => {
     const bookingSeats = await conn.query("SELECT * FROM booking WHERE round = ? AND seat IN (?) FOR UPDATE", [round, [seat]])
     const bookingsBySeat = _.groupBy(bookingSeats, r => r.seat)
-    const seatNotExist = _.difference([seat],  Object.keys(bookingsBySeat))
+    const seatNotExist = _.difference([seat], Object.keys(bookingsBySeat))
 
     if (seatNotExist.length > 0) {
-      throw new Error(`Seats not exists. Round: ${round}, Seat: ${seat}` )
+      throw new Error(`Seats not exists. Round: ${round}, Seat: ${seat}`)
     }
 
     var counter = bookingsBySeat[seat][0].counter
@@ -94,13 +94,13 @@ api.post('/api/makeBooking', async (req, res) => {
 api.post('/api/newRound', async (req, res) => {
   const newId = nanoid(10)
 
-  var rowCodes = _.range(rows).map( i => String.fromCharCode(65 + i) )
+  var rowCodes = _.range(rows).map(i => String.fromCharCode(65 + i))
   var colCodes = _.range(cols)
 
-  var codes = rowCodes.flatMap( r => colCodes.map( c => `${r}${c.toString().padStart(4, '0')}`) )
+  var codes = rowCodes.flatMap(r => colCodes.map(c => `${r}${c.toString().padStart(4, '0')}`))
   var insertParams = _.zip(Array(codes.length).fill(newId), codes)
 
-  await execute( async(conn) => {
+  await execute(async (conn) => {
     await conn.query(`REPLACE INTO config(k,v) VALUES ('round','${newId}')`)
     await conn.batch("INSERT INTO booking(round, seat) VALUES (?, ?)", insertParams)
   })
@@ -129,22 +129,22 @@ async function executeQuery(query, params) {
 
 async function execute(command) {
   let conn;
-  let result; 
+  let result;
 
   try {
     conn = await pool.getConnection();
-    
+
     await conn.beginTransaction();
     try {
       result = await command(conn);
       await conn.commit();
-    } catch(err){
+    } catch (err) {
       console.error("Error executing, reverting changes: ", err);
       await conn.rollback();
       throw err;
     }
   } finally {
-	  if (conn) conn.release(); //release to pool
+    if (conn) conn.release(); //release to pool
   }
 
   return result;
