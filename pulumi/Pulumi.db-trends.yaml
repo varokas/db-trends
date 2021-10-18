@@ -1,5 +1,5 @@
 config:
-  aws:profile: varokas
+  aws:profile: varokas-chuladb-admin
   aws:region: us-west-2
   cloudflare:apiToken:
     secure: AAABAJG1tENbGP/ambpmjlftEyNQm6ZZXy2nJAJSLsSIuIa00zrfizvbxEa/OI/oZlzdfDzSy4cvWNXxgAPLZ4WkhJ1OgF9U

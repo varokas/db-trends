@@ -75,7 +75,7 @@ const ami = pulumi.output(aws.ec2.getAmi({
       { name: "name", values: ["amzn2-python3-*"] },
       { name: "architecture", values: [arch] } 
     ],
-    owners: ["820792572713"], // varokas
+    owners: ["445749771569"], // varokas-chuladb
     mostRecent: true,
 }));
 
@@ -130,17 +130,17 @@ const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{
 }
 `});
 
-const getBooking = new aws.lambda.Function("getBooking", {
-  code: new pulumi.asset.AssetArchive({
-    "booking.py": new pulumi.asset.FileAsset("../booking.py"),
-  }),
-  role: iamForLambda.arn,
-  handler: "booking.get_booking",
-  runtime: "python3.8",
-  environment: {
-      variables: {
-          foo: "bar",
-      },
-  },
-});
+// const getBooking = new aws.lambda.Function("getBooking", {
+//   code: new pulumi.asset.AssetArchive({
+//     "booking.py": new pulumi.asset.FileAsset("../booking.py"),
+//   }),
+//   role: iamForLambda.arn,
+//   handler: "booking.get_booking",
+//   runtime: "python3.8",
+//   environment: {
+//       variables: {
+//           foo: "bar",
+//       },
+//   },
+// });
 
