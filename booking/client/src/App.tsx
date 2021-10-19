@@ -37,12 +37,15 @@ const rowStyle = {
 }
 
 const itemStyle = {
-  display: 'inline-block',
+  display: 'flex',
   height: '50px',
   width: '50px',
   border: 'solid #000',
   borderWidth: '1px',
-  borderColor: 'coral'
+  borderColor: 'black',
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  cursor: 'pointer' as const
 }
 
 const leaderBoardStyle = {
@@ -57,6 +60,10 @@ const leaderBoardStyle = {
 
 export const App = () => {
 
+  const [loadingOwners, setLoadingOwners] = useState<boolean>(false);
+  const [loadingSeats, setLoadingSeats] = useState<boolean>(false);
+  const [loadingSeatsError, setLoadingSeatsError] = useState<string>(null);
+  const [loadingOwnersError, setLoadingOwnersError] = useState<string>(null);
   const [owners, setOwners] = useState<Owner[]>([]);
   const [name, setName] = useState<string>('');
   const [booking, setBooking] = useState<Seat[][]>([]);
@@ -65,6 +72,8 @@ export const App = () => {
 
   const getBooking = useCallback(
     async () => {
+      setLoadingSeats(true);
+      setLoadingSeatsError(null);
       return axios.get('/api/booking')
         .then(res => {
           const seats = res.data as Seat[];
@@ -85,7 +94,10 @@ export const App = () => {
           setBookingMap(Map(newBookingMap));
 
           return seatsGroups
-        }).then(seatsGroups => setBooking(seatsGroups))
+        }).then(seatsGroups => {
+          setBooking(seatsGroups);
+          setLoadingSeats(false);
+        }).catch(err => setLoadingOwnersError(err));
     },
     [],
   );
@@ -93,14 +105,21 @@ export const App = () => {
   useEffect(() => {
     getBooking();
 
-    const interval = setInterval(() => {
-      axios.get('/api/booking/owners')
+    const getOwners = () => {
+      setLoadingOwnersError(null);
+      setLoadingOwners(true);
+      return axios.get('/api/booking/owners')
         .then(res => {
           setOwners(res.data as Owner[]);
+          setLoadingOwners(false);
         }, fail => {
           console.error('fail loading leader board', fail)
-        })
-    }, 10000);
+          setLoadingOwnersError(fail);
+        });
+    };
+
+    getOwners();
+    const interval = setInterval(getOwners, 5000);
 
     return () => clearInterval(interval);
   }, [getBooking]);
@@ -139,25 +158,28 @@ export const App = () => {
     },
     [clicksMap, bookingMap, name]);
 
-
   return (<div style={mainConstentStyle}>
     <div style={leaderBoardStyle}>
       <h2>Owner Dashboard</h2>
-      <ol>
-        {
-          owners.map(o => {
-            return (<li key={o.owner}> {o.owner} ({o.counts})</li>)
-          })
-        }
-      </ol>
+      {loadingOwners
+        ? "Loading..."
+        : loadingOwnersError ? loadingOwnersError : (<ol>
+          {
+            owners.map(o => {
+              return (<li key={o.owner}> {o.owner} ({o.counts})</li>)
+            })
+          }
+        </ol>)
+      }
     </div>
     <div style={rowStyle} >
       Name:
-      <input type="text" value={name} onChange={e => setName(e.target.value)} />
+      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} />
       <button type="button" onClick={onSubmit}>Submit</button>
     </div>
-    {
-      booking.map((group, i) => {
+    {loadingSeats
+      ? "Loading..."
+      : loadingSeatsError ? loadingSeatsError : booking.map((group, i) => {
         return (<div style={rowStyle} key={group[0].seat.charAt(0)}>
           {group.map((s, j) => {
             return (
@@ -165,7 +187,7 @@ export const App = () => {
                 style={
                   {
                     ...itemStyle,
-                    backgroundColor: !s.owner ? 'blue' : (s.owner === name) ? 'green' : 'red'
+                    backgroundColor: !s.owner ? '#79cafc' : (s.owner === name) ? '#e0fc79' : '#fc8079'
                   }
                 }
                 key={s.seat}
