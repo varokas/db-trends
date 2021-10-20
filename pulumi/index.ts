@@ -3,21 +3,21 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 import * as cloudflare from "@pulumi/cloudflare";
+import { DefaultSubnet, DefaultVpc } from "@pulumi/aws/ec2";
 
 //https://www.pulumi.com/docs/tutorials/aws/ec2-webserver/
 
 const range = (n:Number) => [...Array(n).keys()]
 
 const region = "us-west-2"
-const azs = ["a","b"]
+const azs = ["a","b","c","d"].map(az => `${region}${az}`)
 
 const locustEC2Size = "t4g.nano";     // t2.micro is available in the AWS free tier
 const arch = "arm64" //x86_64
 const locustServersCount = 1
 
-const admins = ["tawan", "pongsakorn", "thanat"]
-
 const config = new pulumi.Config("db-trends");
+const dbNameBookings = "bookings"
 const dbUsername = config.requireSecret("dbUsername");
 const dbPassword = config.requireSecret("dbPassword");
 
@@ -34,16 +34,6 @@ new aws.iam.GroupPolicyAttachment("admins", {
   group: adminGroup.name,
   policyArn: "arn:aws:iam::aws:policy/AdministratorAccess",
 });
-admins.map( name => { 
-  let user = new aws.iam.User(`user-${name}`, {
-    path: "/admin/",
-    forceDestroy: true,
-  })
-  const userGroupMemership = new aws.iam.UserGroupMembership(`userGroupMemership-${name}`, {
-      user: user.name,
-      groups: [adminGroup.name],
-  })
-});
 
 //export const password = exampleUserLoginProfile.encryptedPassword;
 
@@ -58,25 +48,34 @@ admins.map( name => {
 // }))
 
 // Network
-const dbtrendsVPC = new aws.ec2.Vpc("dbtrends", {
-  cidrBlock: "10.0.0.0/16",
-  tags: { Name: "dbtrends" },
-});
+const defaultVPC = new aws.ec2.DefaultVpc("default")
+const defaultSubnets = azs.map(az => new aws.ec2.DefaultSubnet(`${az}`, {
+    availabilityZone: az
+}))
 
-const dbtrendsSubnets = azs.map( (az, idx) =>
-  new aws.ec2.Subnet(`dbtrends-${region}${az}`, {
-    vpcId: dbtrendsVPC.id,
-    cidrBlock: `10.0.${idx}.0/24`,
-    availabilityZone: `${region}${az}`,
-    tags: { Name: `dbtrends-${region}${az}` },
-  })
-)
+
 
 // Security Groups
 const ec2SG = new aws.ec2.SecurityGroup("ec2-sg", {
   ingress: [
     { protocol: "tcp", fromPort: 22, toPort: 22, cidrBlocks: ["0.0.0.0/0"] },
-    { protocol: "tcp", fromPort: 5557, toPort: 5557, cidrBlocks: ["10.0.0.0/16"] },
+    { protocol: "tcp", fromPort: 5557, toPort: 5557, cidrBlocks: [defaultVPC.cidrBlock] },
+  ], 
+  egress: [
+    { protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
+  ]
+});
+const rdsSG = new aws.ec2.SecurityGroup("rds-sg", {
+  ingress: [
+    { protocol: "tcp", fromPort: 3306, toPort: 3306, cidrBlocks: [defaultVPC.cidrBlock] },
+  ], 
+  egress: [
+    { protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
+  ]
+});
+const lambdaSG = new aws.ec2.SecurityGroup("lambda-sg", {
+  ingress: [
+    { protocol: "tcp", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
   ], 
   egress: [
     { protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
@@ -84,13 +83,19 @@ const ec2SG = new aws.ec2.SecurityGroup("ec2-sg", {
 });
 
 // DB 
-const dbtrendsDBSubnetGroup = new aws.rds.SubnetGroup("dbtrends", {
-  subnetIds: dbtrendsSubnets.map( (d) => d.id ),
-  tags: {
-      Name: "DBTrendsDBSubnetGroup",
-  },
+const rds = new aws.rds.Instance('dbtrends-rds', {
+  engine: 'mariadb',
+  username: dbUsername,
+  password: dbPassword,
+  //availabilityZone: `${region}${azs[0]}`,
+  instanceClass: 'db.t4g.micro',
+  allocatedStorage: 10,
+  deletionProtection: false,
+  skipFinalSnapshot: true,
+  name: dbNameBookings,
+  vpcSecurityGroupIds: [rdsSG.id]
 });
-
+export const rdsEndpoint = rds.endpoint
 
 // Locust 
 const ami = pulumi.output(aws.ec2.getAmi({
@@ -105,6 +110,7 @@ const ami = pulumi.output(aws.ec2.getAmi({
 // const locustEC2s = range(locustServersCount).map( i => new aws.ec2.Instance(`locust-${i}`, {
 //   instanceType: locustEC2Size,
 //   vpcSecurityGroupIds: [ ec2SG.id ], // reference the security group resource above
+//   //subnetId: dbtrendsSubnets[0].id,
 //   ami: ami.id,
 //   tags: {
 //         Name: `Locust-${i}`,
@@ -115,27 +121,12 @@ const ami = pulumi.output(aws.ec2.getAmi({
 //   pip3 install locust
 //   `
 // }))
+// export const locustEC2Hosts = locustEC2s.map( l => l.publicIp )
 
 // const locustEIPAssocs = range(locustServersCount).map( i => new aws.ec2.EipAssociation(`eipAssoc-locust-${i}`, {
 //   instanceId: locustEC2s[i].id,
 //   allocationId: locustIPs[i].id,
 // }))
-
-// const rds = new aws.rds.Instance('dbtrends-rds', {
-//   engine: 'mariadb',
-//   username: dbUsername,
-//   password: dbPassword,
-//   availabilityZone: `${region}${azs[0]}`,
-//   instanceClass: 'db.t4g.micro',
-//   allocatedStorage: 10,
-//   deletionProtection: false,
-//   skipFinalSnapshot: true,
-
-//   // For a VPC cluster, you will also need the following:
-//   dbSubnetGroupName: dbtrendsDBSubnetGroup.id,
-//   //vpcSecurityGroupIds: ['sg-c1c63aba'],
-// });
-
 
 // Lambda 
 const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{
@@ -153,6 +144,15 @@ const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{
 }
 `});
 
+const lambdaPolicies = [
+  aws.iam.ManagedPolicy.AWSLambdaVPCAccessExecutionRole,
+  aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole
+]
+lambdaPolicies.map( policyArn => new aws.iam.RolePolicyAttachment("lambda-" + policyArn, {
+  policyArn: policyArn,
+  role: iamForLambda
+}))
+
 const bookingLambda = new aws.lambda.Function("getBooking", {
   code: new pulumi.asset.FileArchive("../booking/server/dist/function.zip"),
   role: iamForLambda.arn,
@@ -160,24 +160,44 @@ const bookingLambda = new aws.lambda.Function("getBooking", {
   runtime: aws.lambda.NodeJS12dXRuntime,
   environment: {
       variables: {
-        DB_NAME: "bar",
-        DB_HOST: "localhost",
+        DB_NAME: dbNameBookings,
+        DB_HOST: rds.address,
         DB_USER: dbUsername,
         DB_PASSWORD: dbPassword,
       },
   },
+
+  vpcConfig: {
+    securityGroupIds: [lambdaSG.id],
+    subnetIds: defaultSubnets.map(s => s.id)
+  }
 });
 
-// const bookingEndpoint = new awsx.apigateway.API("hello-world", {
-//   routes: [
-//     {
-//       path: "/{route+}",
-//       method: "ANY",
-//       // Functions can be imported from other modules
-//       eventHandler: bookingLambda 
-//     },
-//   ],
-// });
+const bookingAPIGateway = new aws.apigatewayv2.Api("booking", {
+  protocolType: "HTTP",
+});
 
-///// EXPORTS /////
-// export const bookingURL = bookingEndpoint.url
+const stage = new aws.apigatewayv2.Stage("default", {name: "$default", apiId: bookingAPIGateway.id, autoDeploy: true});
+const bookingAPILambdaIntegration = new aws.apigatewayv2.Integration("booking", {
+  apiId: bookingAPIGateway.id,
+  integrationType: "AWS_PROXY",
+  connectionType: "INTERNET",
+  integrationMethod: "POST",
+  integrationUri: bookingLambda.invokeArn,
+  passthroughBehavior: "WHEN_NO_MATCH",
+  payloadFormatVersion: "2.0",
+});
+const bookingAPIRoute = new aws.apigatewayv2.Route("booking", {
+  apiId: bookingAPIGateway.id,
+  routeKey: "$default",
+  target: pulumi.interpolate`integrations/${bookingAPILambdaIntegration.id}`
+});
+export const bookingURL = stage.invokeUrl
+
+const bookingLambdaPermission = new aws.lambda.Permission("bookingLambdaPermission", {
+  action: "lambda:InvokeFunction",
+  function: bookingLambda.id,
+  principal: "apigateway.amazonaws.com",
+  sourceArn: pulumi.interpolate`${bookingAPIGateway.executionArn}/*/*/*`,
+});
+

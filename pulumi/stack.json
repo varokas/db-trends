@@ -1,0 +1,882 @@
+{
+    "version": 3,
+    "deployment": {
+        "manifest": {
+            "time": "2021-10-18T23:11:59.806928-07:00",
+            "magic": "5e4b6e9c7e64d9e16356d7fb4ac342a2c661621055a31d2ad0ebfff37cd5c49b",
+            "version": "v3.15.0"
+        },
+        "secrets_providers": {
+            "type": "service",
+            "state": {
+                "url": "https://api.pulumi.com",
+                "owner": "varokas",
+                "project": "db-trends",
+                "stack": "db-trends"
+            }
+        },
+        "resources": [
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "custom": false,
+                "type": "pulumi:pulumi:Stack",
+                "outputs": {
+                    "locustEC2Hosts": [
+                        "54.185.219.232"
+                    ]
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0",
+                "custom": true,
+                "id": "420c9759-35d4-441d-b153-8cffd8028194",
+                "type": "pulumi:providers:aws",
+                "inputs": {
+                    "profile": "varokas-chuladb-admin",
+                    "region": "us-west-2",
+                    "version": "4.25.0"
+                },
+                "outputs": {
+                    "profile": "varokas-chuladb-admin",
+                    "region": "us-west-2",
+                    "version": "4.25.0"
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/keyPair:KeyPair::dbtrends",
+                "custom": true,
+                "id": "dbtrends-3a6bb83",
+                "type": "aws:ec2/keyPair:KeyPair",
+                "inputs": {
+                    "__defaults": [
+                        "keyName"
+                    ],
+                    "keyName": "dbtrends-3a6bb83",
+                    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2nyFlMof+eiLZywFBOY9fzHN+B/tyBAqkQfngeYLblKlN8yI64C7CpufMGWHz+QLhWtipR4MP66aBML433cG/pqgZ7ZegTAPJzV1CBO+qJ3qKsTh7HSYIFtZOo6KIrd2eSWrcbXtpMNRDDHhPy1G1gczGZFUrCTG8V0ky9p8nL6Z0fDYLyFAX5Egc7pvCO5Bx/LqW/ap8YDUi9mzafYWjE7wLUNAeBzOSXDOnWdJuEmgeKo7IZ/Rfl0hXwb0r/CCSY60gmlAqo9zQj8t6ew8WS6BgR5lrFfr7u2pdtVdCCGp1KoAWu1Jh03hnDxbd7KMbFUtTE4UjyZArrt43iD3D6EARBEyGLlurwJoawxgSvHz1xojU80cEC/M/XtpN6k2QwXxJC5RMW+dL1PA3C9/tpBoMfpNEuSoA1/Vnse1D0YwGnDeJVszo1RNOx+kQ+4gpvnDN8KglHalGPt7Jz8RJLZ9nKjK/M9Vq7XprRLb2ZQ6B/cA5Y3bFFqulcxLasyc="
+                },
+                "outputs": {
+                    "__meta": "{\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:key-pair/dbtrends-3a6bb83",
+                    "fingerprint": "0f:f3:02:4c:46:ba:77:28:a8:17:0f:0e:87:31:aa:87",
+                    "id": "dbtrends-3a6bb83",
+                    "keyName": "dbtrends-3a6bb83",
+                    "keyPairId": "key-036119a317b9f7316",
+                    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2nyFlMof+eiLZywFBOY9fzHN+B/tyBAqkQfngeYLblKlN8yI64C7CpufMGWHz+QLhWtipR4MP66aBML433cG/pqgZ7ZegTAPJzV1CBO+qJ3qKsTh7HSYIFtZOo6KIrd2eSWrcbXtpMNRDDHhPy1G1gczGZFUrCTG8V0ky9p8nL6Z0fDYLyFAX5Egc7pvCO5Bx/LqW/ap8YDUi9mzafYWjE7wLUNAeBzOSXDOnWdJuEmgeKo7IZ/Rfl0hXwb0r/CCSY60gmlAqo9zQj8t6ew8WS6BgR5lrFfr7u2pdtVdCCGp1KoAWu1Jh03hnDxbd7KMbFUtTE4UjyZArrt43iD3D6EARBEyGLlurwJoawxgSvHz1xojU80cEC/M/XtpN6k2QwXxJC5RMW+dL1PA3C9/tpBoMfpNEuSoA1/Vnse1D0YwGnDeJVszo1RNOx+kQ+4gpvnDN8KglHalGPt7Jz8RJLZ9nKjK/M9Vq7XprRLb2ZQ6B/cA5Y3bFFqulcxLasyc=",
+                    "tags": {},
+                    "tagsAll": {}
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "publicKey": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:iam/user:User::user-pongsakorn",
+                "custom": true,
+                "id": "user-pongsakorn-863222a",
+                "type": "aws:iam/user:User",
+                "inputs": {
+                    "__defaults": [
+                        "name"
+                    ],
+                    "forceDestroy": true,
+                    "name": "user-pongsakorn-863222a",
+                    "path": "/admin/"
+                },
+                "outputs": {
+                    "arn": "arn:aws:iam::445749771569:user/admin/user-pongsakorn-863222a",
+                    "forceDestroy": true,
+                    "id": "user-pongsakorn-863222a",
+                    "name": "user-pongsakorn-863222a",
+                    "path": "/admin/",
+                    "tags": {},
+                    "tagsAll": {},
+                    "uniqueId": "AIDAWPSGBXUY5QTJ4JM6C"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "forceDestroy": null,
+                    "path": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/securityGroup:SecurityGroup::lambda-sg",
+                "custom": true,
+                "id": "sg-0e9d44d7b8040d44b",
+                "type": "aws:ec2/securityGroup:SecurityGroup",
+                "inputs": {
+                    "__defaults": [
+                        "name",
+                        "revokeRulesOnDelete"
+                    ],
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "fromPort": 0,
+                            "protocol": "-1",
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "ingress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "fromPort": 0,
+                            "protocol": "tcp",
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "name": "lambda-sg-d424c81",
+                    "revokeRulesOnDelete": false
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":900000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:security-group/sg-0e9d44d7b8040d44b",
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "description": "",
+                            "fromPort": 0,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "-1",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "id": "sg-0e9d44d7b8040d44b",
+                    "ingress": [
+                        {
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "description": "",
+                            "fromPort": 0,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "tcp",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "name": "lambda-sg-d424c81",
+                    "namePrefix": "",
+                    "ownerId": "445749771569",
+                    "revokeRulesOnDelete": false,
+                    "tags": {},
+                    "tagsAll": {},
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "description": null,
+                    "egress": null,
+                    "ingress": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:iam/role:Role::iamForLambda",
+                "custom": true,
+                "id": "iamForLambda-58efbf9",
+                "type": "aws:iam/role:Role",
+                "inputs": {
+                    "__defaults": [
+                        "forceDetachPolicies",
+                        "maxSessionDuration",
+                        "name",
+                        "path"
+                    ],
+                    "assumeRolePolicy": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Action\": \"sts:AssumeRole\",\n      \"Principal\": {\n        \"Service\": \"lambda.amazonaws.com\"\n      },\n      \"Effect\": \"Allow\",\n      \"Sid\": \"\"\n    }\n  ]\n}\n",
+                    "forceDetachPolicies": false,
+                    "maxSessionDuration": 3600,
+                    "name": "iamForLambda-58efbf9",
+                    "path": "/"
+                },
+                "outputs": {
+                    "arn": "arn:aws:iam::445749771569:role/iamForLambda-58efbf9",
+                    "assumeRolePolicy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+                    "createDate": "2021-10-18T00:48:59Z",
+                    "description": "",
+                    "forceDetachPolicies": false,
+                    "id": "iamForLambda-58efbf9",
+                    "inlinePolicies": [
+                        {
+                            "name": "",
+                            "policy": ""
+                        }
+                    ],
+                    "managedPolicyArns": [],
+                    "maxSessionDuration": 3600,
+                    "name": "iamForLambda-58efbf9",
+                    "namePrefix": "",
+                    "path": "/",
+                    "tags": {},
+                    "tagsAll": {},
+                    "uniqueId": "AROAWPSGBXUY3LUORVUFE"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "assumeRolePolicy": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:iam/user:User::user-tawan",
+                "custom": true,
+                "id": "user-tawan-3e29fce",
+                "type": "aws:iam/user:User",
+                "inputs": {
+                    "__defaults": [
+                        "name"
+                    ],
+                    "forceDestroy": true,
+                    "name": "user-tawan-3e29fce",
+                    "path": "/admin/"
+                },
+                "outputs": {
+                    "arn": "arn:aws:iam::445749771569:user/admin/user-tawan-3e29fce",
+                    "forceDestroy": true,
+                    "id": "user-tawan-3e29fce",
+                    "name": "user-tawan-3e29fce",
+                    "path": "/admin/",
+                    "tags": {},
+                    "tagsAll": {},
+                    "uniqueId": "AIDAWPSGBXUY3CSJANG2R"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "forceDestroy": null,
+                    "path": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:iam/user:User::user-thanat",
+                "custom": true,
+                "id": "user-thanat-8aeb798",
+                "type": "aws:iam/user:User",
+                "inputs": {
+                    "__defaults": [
+                        "name"
+                    ],
+                    "forceDestroy": true,
+                    "name": "user-thanat-8aeb798",
+                    "path": "/admin/"
+                },
+                "outputs": {
+                    "arn": "arn:aws:iam::445749771569:user/admin/user-thanat-8aeb798",
+                    "forceDestroy": true,
+                    "id": "user-thanat-8aeb798",
+                    "name": "user-thanat-8aeb798",
+                    "path": "/admin/",
+                    "tags": {},
+                    "tagsAll": {},
+                    "uniqueId": "AIDAWPSGBXUY3TGTU7IYO"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "forceDestroy": null,
+                    "path": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:iam/group:Group::admins",
+                "custom": true,
+                "id": "admins-f1d530d",
+                "type": "aws:iam/group:Group",
+                "inputs": {
+                    "__defaults": [
+                        "name"
+                    ],
+                    "name": "admins-f1d530d",
+                    "path": "/admin/"
+                },
+                "outputs": {
+                    "arn": "arn:aws:iam::445749771569:group/admin/admins-f1d530d",
+                    "id": "admins-f1d530d",
+                    "name": "admins-f1d530d",
+                    "path": "/admin/",
+                    "uniqueId": "AGPAWPSGBXUY6PRZQIBQW"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "path": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/securityGroup:SecurityGroup::rds-sg",
+                "custom": true,
+                "id": "sg-0a438f8b838504d50",
+                "type": "aws:ec2/securityGroup:SecurityGroup",
+                "inputs": {
+                    "__defaults": [
+                        "name",
+                        "revokeRulesOnDelete"
+                    ],
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "fromPort": 0,
+                            "protocol": "-1",
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "ingress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "fromPort": 3306,
+                            "protocol": "tcp",
+                            "self": false,
+                            "toPort": 3306
+                        }
+                    ],
+                    "name": "rds-sg-44fa13b",
+                    "revokeRulesOnDelete": false
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":900000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:security-group/sg-0a438f8b838504d50",
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "description": "",
+                            "fromPort": 0,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "-1",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "id": "sg-0a438f8b838504d50",
+                    "ingress": [
+                        {
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "description": "",
+                            "fromPort": 3306,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "tcp",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 3306
+                        }
+                    ],
+                    "name": "rds-sg-44fa13b",
+                    "namePrefix": "",
+                    "ownerId": "445749771569",
+                    "revokeRulesOnDelete": false,
+                    "tags": {},
+                    "tagsAll": {},
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "description": null,
+                    "egress": null,
+                    "ingress": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/securityGroup:SecurityGroup::ec2-sg",
+                "custom": true,
+                "id": "sg-04cbfb65ca10d697d",
+                "type": "aws:ec2/securityGroup:SecurityGroup",
+                "inputs": {
+                    "__defaults": [
+                        "name",
+                        "revokeRulesOnDelete"
+                    ],
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "fromPort": 0,
+                            "protocol": "-1",
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "ingress": [
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "fromPort": 22,
+                            "protocol": "tcp",
+                            "self": false,
+                            "toPort": 22
+                        },
+                        {
+                            "__defaults": [
+                                "self"
+                            ],
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "fromPort": 5557,
+                            "protocol": "tcp",
+                            "self": false,
+                            "toPort": 5557
+                        }
+                    ],
+                    "name": "ec2-sg-f77fb2d",
+                    "revokeRulesOnDelete": false
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":900000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:security-group/sg-04cbfb65ca10d697d",
+                    "description": "Managed by Pulumi",
+                    "egress": [
+                        {
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "description": "",
+                            "fromPort": 0,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "-1",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 0
+                        }
+                    ],
+                    "id": "sg-04cbfb65ca10d697d",
+                    "ingress": [
+                        {
+                            "cidrBlocks": [
+                                "0.0.0.0/0"
+                            ],
+                            "description": "",
+                            "fromPort": 22,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "tcp",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 22
+                        },
+                        {
+                            "cidrBlocks": [
+                                "10.0.0.0/16"
+                            ],
+                            "description": "",
+                            "fromPort": 5557,
+                            "ipv6CidrBlocks": [],
+                            "prefixListIds": [],
+                            "protocol": "tcp",
+                            "securityGroups": [],
+                            "self": false,
+                            "toPort": 5557
+                        }
+                    ],
+                    "name": "ec2-sg-f77fb2d",
+                    "namePrefix": "",
+                    "ownerId": "445749771569",
+                    "revokeRulesOnDelete": false,
+                    "tags": {},
+                    "tagsAll": {},
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "description": null,
+                    "egress": null,
+                    "ingress": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:rds/instance:Instance::dbtrends-rds",
+                "custom": true,
+                "id": "dbtrends-rdsea3f69d",
+                "type": "aws:rds/instance:Instance",
+                "inputs": {
+                    "__defaults": [
+                        "autoMinorVersionUpgrade",
+                        "copyTagsToSnapshot",
+                        "deleteAutomatedBackups",
+                        "identifier",
+                        "monitoringInterval",
+                        "performanceInsightsEnabled",
+                        "publiclyAccessible"
+                    ],
+                    "allocatedStorage": 10,
+                    "autoMinorVersionUpgrade": true,
+                    "availabilityZone": "us-west-2a",
+                    "copyTagsToSnapshot": false,
+                    "deleteAutomatedBackups": true,
+                    "deletionProtection": false,
+                    "engine": "mariadb",
+                    "identifier": "dbtrends-rdsea3f69d",
+                    "instanceClass": "db.t4g.micro",
+                    "monitoringInterval": 0,
+                    "name": "bookings",
+                    "password": {
+                        "4dabf18193072939515e22adb298388d": "1b47061264138c4ac30d75fd1eb44270",
+                        "ciphertext": "AAABAEmF1vqLB3PDl+eVhcZzpHVt8dSj/IrTOxUeLVMeIDLi6v1TrctcUc4+BKRFz+olZKUj9s0="
+                    },
+                    "performanceInsightsEnabled": false,
+                    "publiclyAccessible": false,
+                    "skipFinalSnapshot": true,
+                    "username": {
+                        "4dabf18193072939515e22adb298388d": "1b47061264138c4ac30d75fd1eb44270",
+                        "ciphertext": "AAABABopxkLAv/GO74WZNkIvmsFLnJxnISNYQpEMyuizz6m3g7jnsw=="
+                    }
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":2400000000000,\"delete\":3600000000000,\"update\":4800000000000},\"schema_version\":\"1\"}",
+                    "address": "dbtrends-rdsea3f69d.c6qgv553r5pq.us-west-2.rds.amazonaws.com",
+                    "allocatedStorage": 10,
+                    "arn": "arn:aws:rds:us-west-2:445749771569:db:dbtrends-rdsea3f69d",
+                    "autoMinorVersionUpgrade": true,
+                    "availabilityZone": "us-west-2a",
+                    "backupRetentionPeriod": 0,
+                    "backupWindow": "06:09-06:39",
+                    "caCertIdentifier": "rds-ca-2019",
+                    "characterSetName": "",
+                    "copyTagsToSnapshot": false,
+                    "customerOwnedIpEnabled": false,
+                    "dbSubnetGroupName": "dbtrends-9d86cc3",
+                    "deleteAutomatedBackups": true,
+                    "deletionProtection": false,
+                    "domain": "",
+                    "domainIamRoleName": "",
+                    "enabledCloudwatchLogsExports": [],
+                    "endpoint": "dbtrends-rdsea3f69d.c6qgv553r5pq.us-west-2.rds.amazonaws.com:3306",
+                    "engine": "mariadb",
+                    "engineVersion": "10.5.12",
+                    "engineVersionActual": "10.5.12",
+                    "hostedZoneId": "Z1PVIF0B656C1W",
+                    "iamDatabaseAuthenticationEnabled": false,
+                    "id": "dbtrends-rdsea3f69d",
+                    "identifier": "dbtrends-rdsea3f69d",
+                    "instanceClass": "db.t4g.micro",
+                    "iops": 0,
+                    "kmsKeyId": "",
+                    "latestRestorableTime": "0001-01-01T00:00:00Z",
+                    "licenseModel": "general-public-license",
+                    "maintenanceWindow": "sat:11:20-sat:11:50",
+                    "maxAllocatedStorage": 0,
+                    "monitoringInterval": 0,
+                    "monitoringRoleArn": "",
+                    "multiAz": false,
+                    "name": "bookings",
+                    "ncharCharacterSetName": "",
+                    "optionGroupName": "default:mariadb-10-5",
+                    "parameterGroupName": "default.mariadb10.5",
+                    "password": {
+                        "4dabf18193072939515e22adb298388d": "1b47061264138c4ac30d75fd1eb44270",
+                        "ciphertext": "AAABAEFiDZHQY9l3nMDkaax0rrBC+sokbRV4CKi1Pt2epy1SBuqNPVt23HxJdKq/fRil9LwmM1Y="
+                    },
+                    "performanceInsightsEnabled": false,
+                    "performanceInsightsKmsKeyId": "",
+                    "performanceInsightsRetentionPeriod": 0,
+                    "port": 3306,
+                    "publiclyAccessible": false,
+                    "replicaMode": "",
+                    "replicas": [],
+                    "replicateSourceDb": "",
+                    "resourceId": "db-ABUBI4AFUWOIERFRTPWAW6GWLU",
+                    "securityGroupNames": [],
+                    "skipFinalSnapshot": true,
+                    "status": "available",
+                    "storageEncrypted": false,
+                    "storageType": "gp2",
+                    "tags": {},
+                    "tagsAll": {},
+                    "timezone": "",
+                    "username": {
+                        "4dabf18193072939515e22adb298388d": "1b47061264138c4ac30d75fd1eb44270",
+                        "ciphertext": "AAABAGZmfXJkGYmKHCcY4D8I6LfXL+nXWo/tTLBM0ZK6RVABXuNejA=="
+                    },
+                    "vpcSecurityGroupIds": [
+                        "sg-0a438f8b838504d50"
+                    ]
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "allocatedStorage": null,
+                    "availabilityZone": null,
+                    "deletionProtection": null,
+                    "engine": null,
+                    "instanceClass": null,
+                    "name": null,
+                    "password": null,
+                    "skipFinalSnapshot": null,
+                    "username": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:rds/subnetGroup:SubnetGroup::dbtrends",
+                "custom": true,
+                "id": "dbtrends-9d86cc3",
+                "type": "aws:rds/subnetGroup:SubnetGroup",
+                "inputs": {
+                    "__defaults": [
+                        "name"
+                    ],
+                    "description": "Managed by Pulumi",
+                    "name": "dbtrends-9d86cc3",
+                    "subnetIds": [
+                        "subnet-0c80e972c9bbc894e",
+                        "subnet-026d30a377b142dae"
+                    ],
+                    "tags": {
+                        "Name": "DBTrendsDBSubnetGroup",
+                        "__defaults": []
+                    }
+                },
+                "outputs": {
+                    "arn": "arn:aws:rds:us-west-2:445749771569:subgrp:dbtrends-9d86cc3",
+                    "description": "Managed by Pulumi",
+                    "id": "dbtrends-9d86cc3",
+                    "name": "dbtrends-9d86cc3",
+                    "subnetIds": [],
+                    "tags": {
+                        "Name": "DBTrendsDBSubnetGroup"
+                    },
+                    "tagsAll": {
+                        "Name": "DBTrendsDBSubnetGroup"
+                    }
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "initErrors": [
+                    "updating urn:pulumi:db-trends::db-trends::aws:rds/subnetGroup:SubnetGroup::dbtrends: 1 error occurred:\n\t* InvalidParameter: 1 validation error(s) found.\n- missing required field, ModifyDBSubnetGroupInput.SubnetIds.\n\n\n"
+                ],
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "description": null,
+                    "subnetIds": null,
+                    "tags": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:apigateway:x:API::bookings",
+                "custom": false,
+                "type": "aws:apigateway:x:API",
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends"
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/vpc:Vpc::dbtrends",
+                "custom": true,
+                "id": "vpc-0f20f73e6d32db606",
+                "type": "aws:ec2/vpc:Vpc",
+                "inputs": {
+                    "__defaults": [
+                        "assignGeneratedIpv6CidrBlock",
+                        "enableDnsSupport",
+                        "instanceTenancy"
+                    ],
+                    "assignGeneratedIpv6CidrBlock": false,
+                    "cidrBlock": "10.0.0.0/16",
+                    "enableDnsSupport": true,
+                    "instanceTenancy": "default",
+                    "tags": {
+                        "Name": "dbtrends",
+                        "__defaults": []
+                    }
+                },
+                "outputs": {
+                    "__meta": "{\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:vpc/vpc-0f20f73e6d32db606",
+                    "assignGeneratedIpv6CidrBlock": false,
+                    "cidrBlock": "10.0.0.0/16",
+                    "defaultNetworkAclId": "acl-0fb77290400456319",
+                    "defaultRouteTableId": "rtb-0857f2b26e85c8033",
+                    "defaultSecurityGroupId": "sg-01fe523fa829b1465",
+                    "dhcpOptionsId": "dopt-0cfa573d426512b92",
+                    "enableClassiclink": false,
+                    "enableClassiclinkDnsSupport": false,
+                    "enableDnsHostnames": false,
+                    "enableDnsSupport": true,
+                    "id": "vpc-0f20f73e6d32db606",
+                    "instanceTenancy": "default",
+                    "ipv6AssociationId": "",
+                    "ipv6CidrBlock": "",
+                    "mainRouteTableId": "rtb-0857f2b26e85c8033",
+                    "ownerId": "445749771569",
+                    "tags": {
+                        "Name": "dbtrends"
+                    },
+                    "tagsAll": {
+                        "Name": "dbtrends"
+                    }
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "cidrBlock": null,
+                    "tags": null
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/subnet:Subnet::dbtrends-us-west-2a",
+                "custom": true,
+                "id": "subnet-0c80e972c9bbc894e",
+                "type": "aws:ec2/subnet:Subnet",
+                "inputs": {
+                    "__defaults": [
+                        "assignIpv6AddressOnCreation"
+                    ],
+                    "assignIpv6AddressOnCreation": false,
+                    "availabilityZone": "us-west-2a",
+                    "cidrBlock": "10.0.0.0/24",
+                    "mapPublicIpOnLaunch": true,
+                    "tags": {
+                        "Name": "dbtrends-us-west-2a",
+                        "__defaults": []
+                    },
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":1200000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:subnet/subnet-0c80e972c9bbc894e",
+                    "assignIpv6AddressOnCreation": false,
+                    "availabilityZone": "us-west-2a",
+                    "availabilityZoneId": "usw2-az1",
+                    "cidrBlock": "10.0.0.0/24",
+                    "customerOwnedIpv4Pool": "",
+                    "id": "subnet-0c80e972c9bbc894e",
+                    "ipv6CidrBlock": "",
+                    "ipv6CidrBlockAssociationId": "",
+                    "mapCustomerOwnedIpOnLaunch": false,
+                    "mapPublicIpOnLaunch": true,
+                    "outpostArn": "",
+                    "ownerId": "445749771569",
+                    "tags": {
+                        "Name": "dbtrends-us-west-2a"
+                    },
+                    "tagsAll": {
+                        "Name": "dbtrends-us-west-2a"
+                    },
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "dependencies": [
+                    "urn:pulumi:db-trends::db-trends::aws:ec2/vpc:Vpc::dbtrends"
+                ],
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "availabilityZone": null,
+                    "cidrBlock": null,
+                    "mapPublicIpOnLaunch": null,
+                    "tags": null,
+                    "vpcId": [
+                        "urn:pulumi:db-trends::db-trends::aws:ec2/vpc:Vpc::dbtrends"
+                    ]
+                }
+            },
+            {
+                "urn": "urn:pulumi:db-trends::db-trends::aws:ec2/subnet:Subnet::dbtrends-us-west-2b",
+                "custom": true,
+                "id": "subnet-026d30a377b142dae",
+                "type": "aws:ec2/subnet:Subnet",
+                "inputs": {
+                    "__defaults": [
+                        "assignIpv6AddressOnCreation"
+                    ],
+                    "assignIpv6AddressOnCreation": false,
+                    "availabilityZone": "us-west-2b",
+                    "cidrBlock": "10.0.1.0/24",
+                    "mapPublicIpOnLaunch": true,
+                    "tags": {
+                        "Name": "dbtrends-us-west-2b",
+                        "__defaults": []
+                    },
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":1200000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:us-west-2:445749771569:subnet/subnet-026d30a377b142dae",
+                    "assignIpv6AddressOnCreation": false,
+                    "availabilityZone": "us-west-2b",
+                    "availabilityZoneId": "usw2-az2",
+                    "cidrBlock": "10.0.1.0/24",
+                    "customerOwnedIpv4Pool": "",
+                    "id": "subnet-026d30a377b142dae",
+                    "ipv6CidrBlock": "",
+                    "ipv6CidrBlockAssociationId": "",
+                    "mapCustomerOwnedIpOnLaunch": false,
+                    "mapPublicIpOnLaunch": true,
+                    "outpostArn": "",
+                    "ownerId": "445749771569",
+                    "tags": {
+                        "Name": "dbtrends-us-west-2b"
+                    },
+                    "tagsAll": {
+                        "Name": "dbtrends-us-west-2b"
+                    },
+                    "vpcId": "vpc-0f20f73e6d32db606"
+                },
+                "parent": "urn:pulumi:db-trends::db-trends::pulumi:pulumi:Stack::db-trends-db-trends",
+                "dependencies": [
+                    "urn:pulumi:db-trends::db-trends::aws:ec2/vpc:Vpc::dbtrends"
+                ],
+                "provider": "urn:pulumi:db-trends::db-trends::pulumi:providers:aws::default_4_25_0::420c9759-35d4-441d-b153-8cffd8028194",
+                "propertyDependencies": {
+                    "availabilityZone": null,
+                    "cidrBlock": null,
+                    "mapPublicIpOnLaunch": null,
+                    "tags": null,
+                    "vpcId": [
+                        "urn:pulumi:db-trends::db-trends::aws:ec2/vpc:Vpc::dbtrends"
+                    ]
+                }
+            }
+        ],
+        "pending_operations": [
+        ]
+    }
+}

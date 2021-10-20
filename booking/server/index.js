@@ -25,10 +25,6 @@ fs.readFile("create_tables.sql", 'utf8')
   .catch(err => console.log(err))
 
 ///////// ROUTES ////////////
-api.get('/', async (req, res) => {
-  res.header('content-type', 'text/html').send('<div>This is HTML</div>')
-});
-
 api.get('/api/booking', async (req, res) => {
   var round = await getCurrentRound()
 
@@ -46,6 +42,15 @@ api.get('/api/booking/owners', async (req, res) => {
 
   return await executeQuery("SELECT SUM(counter) AS counts, owner FROM booking WHERE round = ? AND owner IS NOT NULL GROUP BY owner ORDER BY SUM(counter) DESC", [round])
 });
+
+api.get('/:p', async (req, res) => {
+  if (!req.params.p) {
+    res.sendFile("dist/static/index.html")
+  }
+
+  res.sendFile(`dist/static/${req.params.p}`)
+});
+
 
 /*
  {
