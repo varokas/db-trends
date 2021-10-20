@@ -1,4 +1,6 @@
 #!/bin/bash
+set -x
+mkdir -p dist
 rm dist/function.zip
 rm -rf dist/static
 mkdir dist/static
