@@ -1,0 +1,38 @@
+name: deploy to lambda
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy_source:
+    name: build and deploy lambda
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Client Package
+        run: |
+          npm install
+          npm run build
+        working-directory: booking/client
+      - name: Server Package Install
+        run: |
+          npm install
+        working-directory: booking/server
+      - name: zip
+        run: |
+          ./package.sh
+        working-directory: booking/server
+          
+#       - name: default deploy
+#         uses: appleboy/lambda-action@master
+#         with:
+#           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws_region: eu-west-1
+#           function_name: my-function
+#           zip_file: bundle.zip
