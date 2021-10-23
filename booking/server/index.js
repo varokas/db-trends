@@ -129,7 +129,7 @@ async function execute(command) {
   let result;
 
   try {
-    const conn = await mariadb.createConnection({
+    conn = await mariadb.createConnection({
       database: process.env.DB_NAME,
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -150,7 +150,9 @@ async function execute(command) {
     console.log(error);
     throw error;
   } finally {
-    if (conn) conn.end()
+    if (conn) { 
+      await conn.end()
+    }
   }
 
   return result;
