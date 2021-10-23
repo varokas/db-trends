@@ -8,14 +8,6 @@ const mariadb = require('mariadb');
 const _ = require('lodash');
 const { nanoid } = require('nanoid')
 
-const pool = mariadb.createPool({
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  connectionLimit: 5,
-  multipleStatements: true
-});
 
 const api = require('lambda-api')();
 
@@ -137,7 +129,13 @@ async function execute(command) {
   let result;
 
   try {
-    conn = await pool.getConnection();
+    const conn = await mariadb.createConnection({
+      database: process.env.DB_NAME,
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      multipleStatements: true
+    })
 
     await conn.beginTransaction();
     try {
@@ -148,6 +146,9 @@ async function execute(command) {
       await conn.rollback();
       throw err;
     }
+  } catch(error) { 
+    console.log(error);
+    throw error;
   } finally {
     if (conn) conn.release(); //release to pool
   }
