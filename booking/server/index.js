@@ -150,7 +150,7 @@ async function execute(command) {
     console.log(error);
     throw error;
   } finally {
-    if (conn) conn.release(); //release to pool
+    if (conn) connconn.end()
   }
 
   return result;
