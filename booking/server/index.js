@@ -32,7 +32,7 @@ api.get('/api/booking/booked', async (req, res) => {
 api.get('/api/booking/owners', async (req, res) => {
   var round = await getCurrentRound()
 
-  return await executeQuery("SELECT SUM(counter) AS counts, owner FROM booking WHERE round = ? AND owner IS NOT NULL GROUP BY owner ORDER BY SUM(counter) DESC", [round])
+  return await executeQuery("SELECT COUNT(counter) AS counts, owner FROM booking WHERE round = ? AND owner IS NOT NULL GROUP BY owner ORDER BY COUNT(counter) DESC", [round])
 });
 
 api.get('/:p', async (req, res) => {
