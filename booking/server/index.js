@@ -150,7 +150,7 @@ async function execute(command) {
     console.log(error);
     throw error;
   } finally {
-    if (conn) connconn.end()
+    if (conn) conn.end()
   }
 
   return result;
