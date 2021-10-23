@@ -1,6 +1,3 @@
-
-
-
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Map } from 'immutable';
@@ -13,7 +10,7 @@ type Seat = {
   round: string;
   seat: string;
   owner: string;
-  clicks?: number;
+  counter?: number;
 };
 
 type Owner = {
@@ -88,8 +85,10 @@ export const App = () => {
               seatsGroups[seatsGroups.length] = [];
               currentRow = s.seat.charAt(0);
             }
-            seatsGroups[seatsGroups.length - 1].push(s)
-          })
+            seatsGroups[seatsGroups.length - 1].push(s);
+
+
+          });
 
           setBookingMap(Map(newBookingMap));
 
@@ -105,9 +104,10 @@ export const App = () => {
   useEffect(() => {
     getBooking();
 
-    const getOwners = () => {
+    const getData = () => {
       setLoadingOwnersError(null);
       setLoadingOwners(true);
+      getBooking();
       return axios.get('/api/booking/owners')
         .then(res => {
           setOwners(res.data as Owner[]);
@@ -118,8 +118,8 @@ export const App = () => {
         });
     };
 
-    getOwners();
-    const interval = setInterval(getOwners, 5000);
+    getData();
+    const interval = setInterval(getData, 5000);
 
     return () => clearInterval(interval);
   }, [getBooking]);
@@ -128,35 +128,45 @@ export const App = () => {
     (seat) => {
       const count = clicksMap.get(seat.seat);
       setClickMap(clicksMap.set(seat.seat, count ? count + 1 : 1))
+      onSubmit();
     },
     [clicksMap]);
 
 
   const onSubmit = useCallback(
     () => {
-      clicksMap.entrySeq().forEach(e => console.log(`key: ${e[0]}, value: ${e[1]}`));
-      const allPromises = clicksMap.entrySeq().map(e => axios.post('/api/makeBooking',
-        {
-          ...bookingMap.get(e[0]),
-          counter: e[1],
-          owner: name
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
+      if (name !== '') {
+        clicksMap.entrySeq().forEach(e => console.log(`key: ${e[0]}, value: ${e[1]}`));
+        const allPromises = clicksMap.entrySeq().map(e => axios.post('/api/makeBooking',
+          {
+            ...bookingMap.get(e[0]),
+            counter: e[1],
+            owner: name
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            }
           }
-        }
-      ));
+        ));
 
-      Promise.all(allPromises).then(value => {
-        console.log('done submitting');
-        getBooking();
-      }, reason => {
-        console.log('fail', reason);
-        getBooking();
-      })
+        Promise.all(allPromises).then(value => {
+          console.log('done submitting');
+          getBooking();
+        }, reason => {
+          console.log('fail', reason);
+          getBooking();
+        });
+      }
     },
     [clicksMap, bookingMap, name]);
+
+
+  const getOwnerClicks = useCallback((seat: Seat) => {
+    const newClicks = clicksMap.get(seat.seat) || 0;
+    const savedClicks = seat.owner === name && seat.counter ? seat.counter : 0;
+    return newClicks + savedClicks;
+  }, [clicksMap, name]);
 
   return (<div style={mainConstentStyle}>
     <div style={leaderBoardStyle}>
@@ -175,7 +185,6 @@ export const App = () => {
     <div style={rowStyle} >
       Name:
       <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} />
-      <button type="button" onClick={onSubmit}>Submit</button>
     </div>
     {loadingSeats
       ? "Loading..."
@@ -193,7 +202,7 @@ export const App = () => {
                 key={s.seat}
                 onClick={() => onSeatClick(s)}
               >
-                {clicksMap.get(s.seat) || 0}
+                {getOwnerClicks(s)}
               </div>);
           })}
         </div>)
