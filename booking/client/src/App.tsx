@@ -53,6 +53,16 @@ const itemStyle = {
   flexDirection: 'column' as const
 }
 
+const colorExplainStyle = {
+  display: 'flex',
+  height: '30px',
+  width: '30px',
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  fontSize: '10px',
+  marginRight: '5px'
+}
+
 
 
 const leaderBoardStyle = {
@@ -209,7 +219,7 @@ export const App = () => {
       </ol>)
       }
     </div>
-    <div style={rowStyle} >
+    <div style={{ ...rowStyle, marginBottom: '20px' }} >
       <div style={colStyle} >
         <span style={{ display: 'flex' }}>Name: <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} /></span>
         <span style={{ display: 'flex', color: 'red' }}>{name ? '' : 'please set your name'}</span>
@@ -217,6 +227,11 @@ export const App = () => {
     </div>
     <div style={{ ...rowStyle, marginBottom: '10px' }} >
       Status: {loadingSeats ? 'Loading...' : loadingSeatsError ? loadingSeatsError : 'Loaded'}
+    </div>
+    <div style={{ ...rowStyle, marginBottom: '40px' }} >
+      <div style={{ ...colorExplainStyle, backgroundColor: '#e0fc79' }}>Owned</div>
+      <div style={{ ...colorExplainStyle, backgroundColor: '#79cafc' }}>Free</div>
+      <div style={{ ...colorExplainStyle, backgroundColor: '#fc8079' }}>Not Owned</div>
     </div>
     {
       booking.map((group, i) => {
