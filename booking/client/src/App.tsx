@@ -80,6 +80,10 @@ const leaderBoardHeaderStyle = {
   height: '20px',
 }
 
+const OwnedColor = '#e0fc79';
+const NotOwnedColor = '#fc8079';
+const FreeColor = '#79cafc';
+
 export const App = () => {
 
   const [loadingOwners, setLoadingOwners] = useState<boolean>(false);
@@ -195,9 +199,8 @@ export const App = () => {
 
 
   const getOwnerClicks = useCallback((seat: Seat) => {
-    // const newClicks = clicksMap.get(seat.seat) || 0;
     const savedClicks = seat.counter ? seat.counter : 0;
-    return savedClicks;// + newClicks;
+    return savedClicks;
   }, [name]);
 
   return (<div style={mainConstentStyle}>
@@ -229,9 +232,9 @@ export const App = () => {
       Status: {loadingSeats ? 'Loading...' : loadingSeatsError ? loadingSeatsError : 'Loaded'}
     </div>
     <div style={{ ...rowStyle, marginBottom: '40px' }} >
-      <div style={{ ...colorExplainStyle, backgroundColor: '#e0fc79' }}>Owned</div>
-      <div style={{ ...colorExplainStyle, backgroundColor: '#79cafc' }}>Free</div>
-      <div style={{ ...colorExplainStyle, backgroundColor: '#fc8079' }}>Not Owned</div>
+      <div style={{ ...colorExplainStyle, backgroundColor: OwnedColor }}>Owned</div>
+      <div style={{ ...colorExplainStyle, backgroundColor: FreeColor }}>Free</div>
+      <div style={{ ...colorExplainStyle, backgroundColor: NotOwnedColor }}>Not Owned</div>
     </div>
     {
       booking.map((group, i) => {
@@ -242,7 +245,7 @@ export const App = () => {
                 style={
                   {
                     ...itemStyle,
-                    backgroundColor: !s.owner ? '#79cafc' : (s.owner === name) ? '#e0fc79' : '#fc8079'
+                    backgroundColor: !s.owner ? FreeColor : (s.owner === name) ? OwnedColor : NotOwnedColor
                   }
                 }
                 key={s.seat}
