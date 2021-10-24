@@ -33,6 +33,13 @@ const rowStyle = {
   width: '60vw'
 }
 
+const colStyle = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  flexWrap: 'wrap' as const,
+  marginBottom: '5px',
+}
+
 const itemStyle = {
   display: 'flex',
   height: '50px',
@@ -42,8 +49,11 @@ const itemStyle = {
   borderColor: 'black',
   alignItems: 'center' as const,
   justifyContent: 'center' as const,
-  cursor: 'pointer' as const
+  cursor: 'pointer' as const,
+  flexDirection: 'column' as const
 }
+
+
 
 const leaderBoardStyle = {
   display: 'flex',
@@ -53,6 +63,11 @@ const leaderBoardStyle = {
   top: 0,
   right: 0,
   flexDirection: 'column' as const
+}
+
+const leaderBoardHeaderStyle = {
+  display: 'flex',
+  height: '20px',
 }
 
 export const App = () => {
@@ -128,9 +143,14 @@ export const App = () => {
     (seat) => {
       const count = clicksMap.get(seat.seat);
       setClickMap(clicksMap.set(seat.seat, count ? count + 1 : 1))
-      onSubmit();
+
     },
     [clicksMap]);
+
+
+  useEffect(() => {
+    onSubmit();
+  }, [clicksMap]);
 
 
   const onSubmit = useCallback(
@@ -163,32 +183,39 @@ export const App = () => {
 
 
   const getOwnerClicks = useCallback((seat: Seat) => {
-    const newClicks = clicksMap.get(seat.seat) || 0;
-    const savedClicks = seat.owner === name && seat.counter ? seat.counter : 0;
-    return newClicks + savedClicks;
-  }, [clicksMap, name]);
+    // const newClicks = clicksMap.get(seat.seat) || 0;
+    const savedClicks = seat.counter ? seat.counter : 0;
+    return savedClicks;// + newClicks;
+  }, [name]);
 
   return (<div style={mainConstentStyle}>
     <div style={leaderBoardStyle}>
-      <h2>Owner Dashboard</h2>
-      {loadingOwners
-        ? "Loading..."
-        : loadingOwnersError ? loadingOwnersError : (<ol>
-          {
-            owners.map(o => {
-              return (<li key={o.owner}> {o.owner} ({o.counts})</li>)
-            })
-          }
-        </ol>)
+      <div style={colStyle}>
+        <h2 style={leaderBoardHeaderStyle}>Owner Dashboard</h2>
+        <span style={leaderBoardHeaderStyle}>{
+          loadingOwners
+            ? "Loading..."
+            : loadingOwnersError ? loadingOwnersError : "Loaded"}</span>
+      </div>
+
+      {(<ol>
+        {
+          owners.map(o => {
+            return (<li key={o.owner}> {o.owner} ({o.counts})</li>)
+          })
+        }
+      </ol>)
       }
     </div>
     <div style={rowStyle} >
       Name:
       <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} />
     </div>
-    {loadingSeats
-      ? "Loading..."
-      : loadingSeatsError ? loadingSeatsError : booking.map((group, i) => {
+    <div style={{ ...rowStyle, marginBottom: '10px' }} >
+      Status: {loadingSeats ? 'Loading...' : loadingSeatsError ? loadingSeatsError : 'Loaded'}
+    </div>
+    {
+      booking.map((group, i) => {
         return (<div style={rowStyle} key={group[0].seat.charAt(0)}>
           {group.map((s, j) => {
             return (
@@ -202,7 +229,8 @@ export const App = () => {
                 key={s.seat}
                 onClick={() => onSeatClick(s)}
               >
-                {getOwnerClicks(s)}
+                <div style={{ display: 'flex' }}>{clicksMap.get(s.seat) || 0}</div>
+                <div style={{ display: 'flex', fontSize: '10px' }}>{getOwnerClicks(s)}</div>
               </div>);
           })}
         </div>)
