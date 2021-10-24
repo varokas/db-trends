@@ -141,11 +141,13 @@ export const App = () => {
 
   const onSeatClick = useCallback(
     (seat) => {
-      const count = clicksMap.get(seat.seat);
-      setClickMap(clicksMap.set(seat.seat, count ? count + 1 : 1))
+      if (name && !loadingSeats) {
+        const count = clicksMap.get(seat.seat);
+        setClickMap(clicksMap.set(seat.seat, count ? count + 1 : 1))
+      }
 
     },
-    [clicksMap]);
+    [clicksMap, name, loadingSeats]);
 
 
   useEffect(() => {
@@ -208,8 +210,10 @@ export const App = () => {
       }
     </div>
     <div style={rowStyle} >
-      Name:
-      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} />
+      <div style={colStyle} >
+        <span style={{ display: 'flex' }}>Name: <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} /></span>
+        <span style={{ display: 'flex', color: 'red' }}>{name ? '' : 'please set your name'}</span>
+      </div>
     </div>
     <div style={{ ...rowStyle, marginBottom: '10px' }} >
       Status: {loadingSeats ? 'Loading...' : loadingSeatsError ? loadingSeatsError : 'Loaded'}
