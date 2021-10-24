@@ -82,7 +82,7 @@ api.post('/api/makeBooking', async (req, res) => {
   });
 
   if (result.error) {
-    return res.status(400).send(result)
+    return res.send(result)
   }
 
   return result
@@ -146,11 +146,11 @@ async function execute(command) {
       await conn.rollback();
       throw err;
     }
-  } catch(error) { 
+  } catch (error) {
     console.log(error);
     throw error;
   } finally {
-    if (conn) { 
+    if (conn) {
       await conn.end()
     }
   }
