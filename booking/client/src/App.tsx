@@ -177,21 +177,21 @@ export const App = () => {
   const onSubmit = useCallback(
     () => {
       if (name !== '') {
-        clicksMap.entrySeq().forEach(e => console.log(`key: ${e[0]}, value: ${e[1]}`));
-        const allPromises = clicksMap.entrySeq().map(e => axios.post('/api/makeBooking',
-          {
-            ...bookingMap.get(e[0]),
-            counter: e[1],
-            owner: name
-          },
+        const body = clicksMap.entrySeq().map(e =>
+        ({
+          ...bookingMap.get(e[0]),
+          counter: e[1],
+          owner: name
+        }));
+
+        axios.post('/api/makeBookings',
+          body,
           {
             headers: {
               'Content-Type': 'application/json',
             }
           }
-        ));
-
-        Promise.all(allPromises).then(value => {
+        ).then(value => {
           console.log('done submitting');
           getBooking();
         }, reason => {
