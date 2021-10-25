@@ -1,6 +1,6 @@
 ///////// VARIABLES ////////////
-rows = 10
-cols = 10
+var rows = 10
+var cols = 10
 
 ///////// IMPORTS ////////////
 const fs = require('fs').promises
@@ -110,6 +110,17 @@ async function makeBookings(round, bookings) {
 }
 
 api.post('/api/newRound', async (req, res) => {
+  const rowBody = req.body.rows 
+  const colBody = req.body.cols 
+
+  if (rowBody) {
+    rows = rowBody
+  }
+  
+  if (colBody) {
+    cols = colBody
+  }
+
   const newId = nanoid(10)
 
   var rowCodes = _.range(rows).map(i => String.fromCharCode(65 + i))
