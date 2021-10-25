@@ -47,46 +47,67 @@ api.get('/:p', async (req, res) => {
 /*
  {
   "seat": "A0001",
-  "name": "abc",
+  "owner": "abc",
   "counter": 5
 } 
  */
 api.post('/api/makeBooking', async (req, res) => {
   var round = await getCurrentRound()
 
-  const seat = req.body.seat
-  const name = req.body.owner
-  const newCounter = req.body.counter
+  const bookings = [req.body]
 
-  result = await execute(async (conn) => {
-    const bookingSeats = await conn.query("SELECT * FROM booking WHERE round = ? AND seat IN (?) FOR UPDATE", [round, [seat]])
+  return makeBookings(round, bookings)
+});
+
+/*
+[{
+  "seat": "A0001",
+  "owner": "abc",
+  "counter": 5
+}] 
+ */
+api.post('/api/makeBookings', async (req, res) => {
+  var round = await getCurrentRound()
+
+  const bookings = req.body
+
+  return makeBookings(round, bookings)
+});
+
+async function makeBookings(round, bookings) {
+  const seats = bookings.map( b => b.seat )
+  const reqBySeats = _.groupBy(bookings, r => r.seat)
+
+  return await execute(async (conn) => {
+    const bookingSeats = await conn.query("SELECT * FROM booking WHERE round = ? AND seat IN (?) FOR UPDATE", [round, seats])
     const bookingsBySeat = _.groupBy(bookingSeats, r => r.seat)
-    const seatNotExist = _.difference([seat], Object.keys(bookingsBySeat))
+    const seatNotExist = _.difference(seats, Object.keys(bookingsBySeat))
 
     if (seatNotExist.length > 0) {
-      throw new Error(`Seats not exists. Round: ${round}, Seat: ${seat}`)
+      throw new Error(`Seats not exists. Round: ${round}, Seats: ${seatNotExist}`)
     }
 
-    var counter = bookingsBySeat[seat][0].counter
-    if (counter == null || counter < newCounter) {
-      await conn.query("UPDATE booking SET owner=?, counter=? WHERE round = ? AND seat = ?", [name, newCounter, round, seat])
-      return {
-        round, seat, counter, newCounter
-      }
-    } else {
-      return {
-        "error": "Cannot take over seat",
-        round, seat, counter, newCounter
+    var result = [];
+    for (const seatIdx in seats) {
+      const seat = seats[seatIdx]
+      const owner = reqBySeats[seat][0].owner
+      const newCounter = reqBySeats[seat][0].counter
+
+      var counter = bookingsBySeat[seat][0].counter
+      if (counter == null || counter < newCounter) {
+        await conn.query("UPDATE booking SET owner=?, counter=? WHERE round = ? AND seat = ?", [owner, newCounter, round, seat])
+        result.push({round, seat, owner, counter, newCounter})
+      } else {
+        result.push({
+          "error": "Cannot take over seat",
+          round, seat, counter, owner, newCounter
+        })
       }
     }
-  });
 
-  if (result.error) {
-    return res.send(result)
-  }
-
-  return result
-});
+    return result;
+  })
+}
 
 api.post('/api/newRound', async (req, res) => {
   const newId = nanoid(10)
