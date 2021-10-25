@@ -68,16 +68,16 @@ const colorExplainStyle = {
 const leaderBoardStyle = {
   display: 'flex',
   height: '100vw',
-  width: '20vw',
+  width: '30vw',
   position: 'fixed' as const,
   top: 0,
   right: 0,
-  flexDirection: 'column' as const
+  flexDirection: 'column' as const,
 }
 
 const leaderBoardHeaderStyle = {
   display: 'flex',
-  height: '20px',
+  minHeight: '20px',
 }
 
 const OwnedColor = '#e0fc79';
@@ -213,7 +213,7 @@ export const App = () => {
       <div style={colStyle}>
         <h2 style={leaderBoardHeaderStyle}>Owner Dashboard</h2>
         <span style={leaderBoardHeaderStyle}>
-          {loadingOwnersError
+          Status: {loadingOwnersError
             ? (<span style={{ color: 'red' }}>loadingOwnersError</span>)
             : loadingOwners ? "Loading..." : "Loaded"}
         </span>
