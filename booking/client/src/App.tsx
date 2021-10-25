@@ -125,7 +125,11 @@ export const App = () => {
         }).then(seatsGroups => {
           setBooking(seatsGroups);
           setLoadingSeats(false);
-        }).catch(err => setLoadingOwnersError(err));
+        }).catch(err => {
+          console.error('fail loading board', err);
+          setLoadingSeats(false);
+          setLoadingSeatsError(err.response.status + ' ' + err.response.data)
+        });
     },
     [],
   );
@@ -141,9 +145,10 @@ export const App = () => {
         .then(res => {
           setOwners(res.data as Owner[]);
           setLoadingOwners(false);
-        }, fail => {
-          console.error('fail loading leader board', fail)
-          setLoadingOwnersError(fail);
+        }).catch(err => {
+          console.error('fail loading leader board', err);
+          setLoadingOwners(false);
+          setLoadingOwnersError(err.response.status + ' ' + err.response.data);
         });
     };
 
@@ -207,10 +212,11 @@ export const App = () => {
     <div style={leaderBoardStyle}>
       <div style={colStyle}>
         <h2 style={leaderBoardHeaderStyle}>Owner Dashboard</h2>
-        <span style={leaderBoardHeaderStyle}>{
-          loadingOwners
-            ? "Loading..."
-            : loadingOwnersError ? loadingOwnersError : "Loaded"}</span>
+        <span style={leaderBoardHeaderStyle}>
+          {loadingOwnersError
+            ? (<span style={{ color: 'red' }}>loadingOwnersError</span>)
+            : loadingOwners ? "Loading..." : "Loaded"}
+        </span>
       </div>
 
       {(<ol>
@@ -229,7 +235,9 @@ export const App = () => {
       </div>
     </div>
     <div style={{ ...rowStyle, marginBottom: '10px' }} >
-      Status: {loadingSeats ? 'Loading...' : loadingSeatsError ? loadingSeatsError : 'Loaded'}
+      Status: {loadingSeats ? 'Loading...'
+        : loadingSeatsError
+          ? (<span style={{ color: 'red' }}>loadingSeatsError</span>) : 'Loaded'}
     </div>
     <div style={{ ...rowStyle, marginBottom: '40px' }} >
       <div style={{ ...colorExplainStyle, backgroundColor: OwnedColor }}>Owned</div>
