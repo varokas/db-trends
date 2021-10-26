@@ -28,11 +28,11 @@ services:
       - "DB_HOST=db"
       - "DB_USER=root"
       - "DB_PASSWORD=root_password"
-      - "LAMBDA_PATH=/home/node/app/index"
+      - "LAMBDA_PATH=./index"
       - "LAMBDA_FUNC=handler"
       - "PROXY_PORT=3000"
     volumes:
       - .:/home/node/app
     ports:
       - "3000:3000"
-    command: "npx nodemon run.js"
+    command: "npx ts-node-dev --respawn --poll src/run.ts"

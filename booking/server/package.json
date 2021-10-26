@@ -4,17 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/aws-lambda": "^8.10.84",
+    "@types/node": "^16.11.6",
     "lambda-api": "^0.11.1",
     "lodash": "^4.17.21",
     "mariadb": "^2.5.4",
-    "nanoid": "^3.1.30"
+    "nanoid": "^3.1.30",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.4"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.176",
     "aws-sdk": "^2.1009.0",
     "lambda-proxy-server": "0.0.3",
     "nodemon": "^2.0.13"
