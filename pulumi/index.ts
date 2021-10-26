@@ -16,6 +16,9 @@ const locustEC2Size = "t4g.nano";     // t2.micro is available in the AWS free t
 const arch = "arm64" //x86_64
 const locustServersCount = 1
 
+const redisDemoEC2Size = "t4g.micro"
+const redisDemoArch = "arm64" //x86_64
+
 const config = new pulumi.Config("db-trends");
 const dbNameBookings = "bookings"
 const dbUsername = config.requireSecret("dbUsername");
@@ -35,8 +38,6 @@ new aws.iam.GroupPolicyAttachment("admins", {
   policyArn: "arn:aws:iam::aws:policy/AdministratorAccess",
 });
 
-//export const password = exampleUserLoginProfile.encryptedPassword;
-
 // EIPs & DNS
 // const locustIPs = range(locustServersCount).map( i => new aws.ec2.Eip(`locust-${i}`));
 // const locustRecords = range(locustServersCount).map( i => new cloudflare.Record(`locust-${i}`, {
@@ -47,6 +48,16 @@ new aws.iam.GroupPolicyAttachment("admins", {
 //   ttl: 3600
 // }))
 
+const redisDemoEIP = new aws.ec2.Eip(`redisDemoIP`)
+new cloudflare.Record(`redisDemoIP`, {
+    name: `redis-demo`,
+    zoneId: "b52117ad37fcc6bf9077251553d7d9d8",
+    type: "A",
+  value: redisDemoEIP.publicIp,
+  ttl: 3600
+})
+export const redisDemoIP = redisDemoEIP.publicIp
+
 // Network
 const defaultVPC = new aws.ec2.DefaultVpc("default")
 const defaultSubnets = azs.map(az => new aws.ec2.DefaultSubnet(`${az}`, {
@@ -54,11 +65,11 @@ const defaultSubnets = azs.map(az => new aws.ec2.DefaultSubnet(`${az}`, {
 }))
 
 
-
 // Security Groups
 const ec2SG = new aws.ec2.SecurityGroup("ec2-sg", {
   ingress: [
     { protocol: "tcp", fromPort: 22, toPort: 22, cidrBlocks: ["0.0.0.0/0"] },
+    { protocol: "tcp", fromPort: 80, toPort: 80, cidrBlocks: ["0.0.0.0/0"] },
     { protocol: "tcp", fromPort: 5557, toPort: 5557, cidrBlocks: [defaultVPC.cidrBlock] },
   ], 
   egress: [
@@ -97,7 +108,7 @@ const rds = new aws.rds.Instance('dbtrends-rds', {
 });
 export const rdsEndpoint = rds.endpoint
 
-// Locust 
+// EC2
 const ami = pulumi.output(aws.ec2.getAmi({
     filters: [
       { name: "name", values: ["amzn2-python3-*"] },
@@ -110,7 +121,6 @@ const ami = pulumi.output(aws.ec2.getAmi({
 // const locustEC2s = range(locustServersCount).map( i => new aws.ec2.Instance(`locust-${i}`, {
 //   instanceType: locustEC2Size,
 //   vpcSecurityGroupIds: [ ec2SG.id ], // reference the security group resource above
-//   //subnetId: dbtrendsSubnets[0].id,
 //   ami: ami.id,
 //   tags: {
 //         Name: `Locust-${i}`,
@@ -127,6 +137,22 @@ const ami = pulumi.output(aws.ec2.getAmi({
 //   instanceId: locustEC2s[i].id,
 //   allocationId: locustIPs[i].id,
 // }))
+
+const redisDemoEC2 = new aws.ec2.Instance(`redis-demo`, {
+  instanceType: redisDemoEC2Size,
+  vpcSecurityGroupIds: [ ec2SG.id ], // reference the security group resource above
+  ami: ami.id,
+  tags: {
+        Name: `RedisDemo`,
+  },
+  keyName: dbTrendsPubKey.keyName,
+  associatePublicIpAddress: true,
+})
+const lredisDemoEIPAssocs = new aws.ec2.EipAssociation(`eipAssoc-redisDemo`, {
+  instanceId: redisDemoEC2.id,
+  allocationId: redisDemoEIP.id,
+})
+
 
 // Lambda 
 const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{

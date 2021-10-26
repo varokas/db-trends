@@ -75,3 +75,15 @@ $ npm run dev
 ```
 
 Parcel is also set to proxies `http://localhost:1234/api` to `http://localhost:3000/api`
+
+### Database Debug
+```
+ssh -i ~/.ssh/dbtrends -L 3306:dbtrends-rdsb86fe29.c6qgv553r5pq.us-west-2.rds.amazonaws.com:3306 ec2-user@redis-demo.varokas.com
+```
+
+### Locust
+```
+$ cd locust
+$ python -m venv .venv
+$ source .venv/bin/activate 
+```
