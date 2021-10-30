@@ -5,13 +5,21 @@ import { nanoid } from 'nanoid'
 import createAPI from 'lambda-api';
 
 import { Context, APIGatewayEvent } from "aws-lambda";
-import { MysqlDB } from "./db"
+import { MysqlDB, DB, DynamoDB } from "./db"
 
 ///////// VARIABLES ////////////
 var rows = 10
 var cols = 10
 
-const db = new MysqlDB()
+const dbType = process.env.DB_TYPE 
+console.log(`dbType: ${dbType}`)
+
+var db:DB
+if(dbType == "dynamodb-local") {
+   db = new DynamoDB("us-west-2", "http://dynamodb:8000")
+} else {
+   db = new MysqlDB()
+}
 
 ///////// ROUTES ////////////
 const api = createAPI()

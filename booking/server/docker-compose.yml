@@ -7,6 +7,15 @@ services:
     environment:
       MARIADB_DATABASE: bookings
       MYSQL_ROOT_PASSWORD: root_password
+  dynamodb:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    #ports:
+    #  - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
   # lambda:
   #   image: lambci/lambda:nodejs12.x
   #   environment:
@@ -31,8 +40,14 @@ services:
       - "LAMBDA_PATH=./index"
       - "LAMBDA_FUNC=handler"
       - "PROXY_PORT=3000"
+      - "DB_TYPE=dynamodb-local"
+      - "AWS_ACCESS_KEY_ID=DUMMYIDEXAMPLE"
+      - "AWS_SECRET_ACCESS_KEY=DUMMYEXAMPLEKEY"
     volumes:
       - .:/home/node/app
     ports:
       - "3000:3000"
     command: "npx ts-node-dev --respawn --poll src/run.ts"
+    depends_on:
+      - dynamodb
+      - db

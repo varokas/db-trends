@@ -163,3 +163,76 @@ export class MysqlDB implements DB {
   }
 }
   
+import AWS from 'aws-sdk';
+
+export class DynamoDB implements DB {
+  dynamodb: AWS.DynamoDB;
+
+  constructor(region: string, endpoint?: string) {
+    AWS.config.update({region})
+
+    if (endpoint) {
+      this.dynamodb = new AWS.DynamoDB({endpoint})
+    } else {
+      this.dynamodb = new AWS.DynamoDB()
+    }
+
+    // WARNING: below does not block...
+    this.createTablesIfNotExists()
+      .then( t => console.log("DynamoDB Table created") )
+      .catch( ex => console.log(ex) )
+  }
+
+  private async createTablesIfNotExists() {
+    const tables = await this.listTable()
+    const tableNames = new Set(tables.TableNames)
+
+    console.log(`Found DynamoDB Tables: ${tables.TableNames}`)
+    
+    const createTablePromises:Promise<AWS.DynamoDB.Types.CreateTableOutput>[] = []
+    if (!tableNames.has("Config")) {
+      console.log("Createing Config Table")
+      createTablePromises.push(
+        this.dynamodb.createTable({
+          TableName : "Config",
+          KeySchema: [       
+              { AttributeName: "key", KeyType: "HASH"},
+          ],
+          AttributeDefinitions: [       
+              { AttributeName: "key", AttributeType: "S" },
+          ],
+          ProvisionedThroughput: {       
+              ReadCapacityUnits: 3, 
+              WriteCapacityUnits: 3
+          }
+        }).promise()
+      )
+    }
+    
+    return Promise.all(createTablePromises)
+  }
+
+  private async listTable():Promise<AWS.DynamoDB.Types.ListTablesOutput> {
+    return this.dynamodb.listTables({}).promise()
+  }
+
+  newRound(newRoundId: string, codes: string[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  getCurrentRound(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+  makeBookings(round: string, bookings: DBBooking[]): Promise<DBMakeBookingResult[]> {
+    throw new Error("Method not implemented.");
+  }
+  getBookings(round: string): Promise<DBBookingResult[]> {
+    throw new Error("Method not implemented.");
+  }
+  getBooked(round: string): Promise<DBBookingResult[]> {
+    throw new Error("Method not implemented.");
+  }
+  getOwners(round: string): Promise<DBOwnerResult[]> {
+    throw new Error("Method not implemented.");
+  }
+
+}

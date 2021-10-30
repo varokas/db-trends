@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.39.0",
     "@types/aws-lambda": "^8.10.84",
     "@types/node": "^16.11.6",
+    "add": "^2.0.6",
     "lambda-api": "^0.11.1",
     "lodash": "^4.17.21",
     "mariadb": "^2.5.4",
