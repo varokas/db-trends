@@ -167,14 +167,17 @@ import AWS from 'aws-sdk';
 
 export class DynamoDB implements DB {
   dynamodb: AWS.DynamoDB;
+  docClient: AWS.DynamoDB.DocumentClient;
 
   constructor(region: string, endpoint?: string) {
     AWS.config.update({region})
 
     if (endpoint) {
       this.dynamodb = new AWS.DynamoDB({endpoint})
+      this.docClient = new AWS.DynamoDB.DocumentClient({endpoint})
     } else {
       this.dynamodb = new AWS.DynamoDB()
+      this.docClient = new AWS.DynamoDB.DocumentClient()
     }
 
     // WARNING: below does not block...
@@ -184,7 +187,7 @@ export class DynamoDB implements DB {
   }
 
   private async createTablesIfNotExists() {
-    const tables = await this.listTable()
+    const tables = await this.dynamodb.listTables({}).promise()
     const tableNames = new Set(tables.TableNames)
 
     console.log(`Found DynamoDB Tables: ${tables.TableNames}`)
@@ -212,15 +215,24 @@ export class DynamoDB implements DB {
     return Promise.all(createTablePromises)
   }
 
-  private async listTable():Promise<AWS.DynamoDB.Types.ListTablesOutput> {
-    return this.dynamodb.listTables({}).promise()
+  async newRound(newRoundId: string, codes: string[]): Promise<void> {
+    await this.docClient.put({
+      TableName: "Config",
+      Item: {"key": "round", "value": newRoundId}
+    }).promise()
   }
+  async getCurrentRound(): Promise<string> {
+    const data = await this.docClient.get({
+      TableName: "Config",
+      Key: {"key": "round"}
+    }).promise()
 
-  newRound(newRoundId: string, codes: string[]): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  getCurrentRound(): Promise<string> {
-    throw new Error("Method not implemented.");
+    if (data.Item) {
+      console.log(data.Item)
+      return data.Item["value"]
+    }
+
+    return "unknown"
   }
   makeBookings(round: string, bookings: DBBooking[]): Promise<DBMakeBookingResult[]> {
     throw new Error("Method not implemented.");
