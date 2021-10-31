@@ -95,6 +95,7 @@ export const App = () => {
   const [booking, setBooking] = useState<Seat[][]>([]);
   const [bookingMap, setBookingMap] = useState<Map<string, Seat>>(Map({}));
   const [clicksMap, setClickMap] = useState<Map<string, number>>(Map({}));
+  const [isStart, setStart] = useState<boolean>(false);
 
   const getBooking = useCallback(
     async () => {
@@ -136,29 +137,29 @@ export const App = () => {
   );
 
   useEffect(() => {
-    getBooking();
-
     const getData = () => {
-      setLoadingOwnersError(null);
-      setLoadingOwners(true);
-      getBooking();
-      return axios.get('/api/booking/owners')
-        .then(res => {
-          setOwners(res.data as Owner[]);
-          setLoadingOwners(false);
-        }).catch(err => {
-          console.error('fail loading leader board', err);
-          setLoadingOwners(false);
-          setLoadingOwnersError(err.response.status + ' ' + err.response.data);
-          //alert('Fail loading leader board: ' + err.response.status + ' ' + err.response.data);
-        });
+      if (isStart) {
+        setLoadingOwnersError(null);
+        setLoadingOwners(true);
+        getBooking();
+        return axios.get('/api/booking/owners')
+          .then(res => {
+            setOwners(res.data as Owner[]);
+            setLoadingOwners(false);
+          }).catch(err => {
+            console.error('fail loading leader board', err);
+            setLoadingOwners(false);
+            setLoadingOwnersError(err.response.status + ' ' + err.response.data);
+            //alert('Fail loading leader board: ' + err.response.status + ' ' + err.response.data);
+          });
+      }
     };
 
     getData();
     const interval = setInterval(getData, 5000);
 
     return () => clearInterval(interval);
-  }, [getBooking]);
+  }, [getBooking, isStart]);
 
   const onSeatClick = useCallback(
     (seat) => {
@@ -178,7 +179,7 @@ export const App = () => {
 
   const onSubmit = useCallback(
     () => {
-      if (name !== '') {
+      if (name !== '' && isStart) {
         const body = clicksMap.entrySeq().map(e =>
         ({
           ...bookingMap.get(e[0]),
@@ -202,7 +203,14 @@ export const App = () => {
         });
       }
     },
-    [clicksMap, bookingMap, name]);
+    [clicksMap, bookingMap, name, isStart]);
+
+
+  const saveName = useCallback(() => {
+    if (name) {
+      setStart(true);
+    }
+  }, [name]);
 
 
   const getOwnerClicks = useCallback((seat: Seat) => {
@@ -232,8 +240,20 @@ export const App = () => {
     </div>
     <div style={{ ...rowStyle, marginBottom: '20px' }} >
       <div style={colStyle} >
-        <span style={{ display: 'flex' }}>Name: <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} /></span>
-        <span style={{ display: 'flex', color: 'red' }}>{name ? '' : 'please set your name'}</span>
+        {
+          isStart ? (
+            <span style={{ display: 'flex' }}>Name: {name}</span>
+          )
+            : (
+              <React.Fragment>
+                <span style={{ display: 'flex' }}>
+                  Name: <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={'your name'} />
+                  <button type="button" onClick={saveName}>OK</button>
+                </span>
+                <span style={{ display: 'flex', color: 'red' }}>{name ? '' : 'please set your name'}</span>
+              </React.Fragment>
+            )
+        }
       </div>
     </div>
     <div style={{ ...rowStyle, marginBottom: '10px' }} >
