@@ -204,10 +204,7 @@ export class DynamoDB implements DB {
           AttributeDefinitions: [       
               { AttributeName: "key", AttributeType: "S" },
           ],
-          ProvisionedThroughput: {       
-              ReadCapacityUnits: 3, 
-              WriteCapacityUnits: 3
-          }
+          BillingMode: "PAY_PER_REQUEST",
         }).promise()
       )
     }

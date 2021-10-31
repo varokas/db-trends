@@ -33,7 +33,11 @@ jobs:
         run: |
           ./package.sh
         working-directory: booking/server
-      - name: Lambda Upload
+      - name: Lambda Upload to RDS Endpoint
         run: |
           aws lambda update-function-code --function-name getBooking-4f4ac4b --zip-file fileb://dist/function.zip
+        working-directory: booking/server
+      - name: Lambda Upload to DynamoDB Endpoint
+        run: |
+          aws lambda update-function-code --function-name bookingDynamo-58080fd --zip-file fileb://dist/function.zip
         working-directory: booking/server

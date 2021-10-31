@@ -17,6 +17,8 @@ console.log(`dbType: ${dbType}`)
 var db:DB
 if(dbType == "dynamodb-local") {
    db = new DynamoDB("us-west-2", "http://dynamodb:8000")
+} else if (dbType == "dynamodb") {
+   db = new DynamoDB("us-west-2") 
 } else {
    db = new MysqlDB()
 }

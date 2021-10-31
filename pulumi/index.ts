@@ -19,6 +19,8 @@ const locustServersCount = 1
 const redisDemoEC2Size = "t4g.micro"
 const redisDemoArch = "arm64" //x86_64
 
+const accountNumber = "445749771569"
+
 const config = new pulumi.Config("db-trends");
 const dbNameBookings = "bookings"
 const dbUsername = config.requireSecret("dbUsername");
@@ -114,7 +116,7 @@ const ami = pulumi.output(aws.ec2.getAmi({
       { name: "name", values: ["amzn2-python3-*"] },
       { name: "architecture", values: [arch] } 
     ],
-    owners: ["445749771569"], // varokas-chuladb
+    owners: [accountNumber], // varokas-chuladb
     mostRecent: true,
 }));
 
@@ -172,7 +174,8 @@ const iamForLambda = new aws.iam.Role("iamForLambda", {assumeRolePolicy: `{
 
 const lambdaPolicies = [
   aws.iam.ManagedPolicy.AWSLambdaVPCAccessExecutionRole,
-  aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole
+  aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
+  aws.iam.ManagedPolicies.AmazonDynamoDBFullAccess
 ]
 lambdaPolicies.map( policyArn => new aws.iam.RolePolicyAttachment("lambda-" + policyArn, {
   policyArn: policyArn,
@@ -199,10 +202,26 @@ const bookingLambda = new aws.lambda.Function("getBooking", {
   }
 });
 
+const bookingWithDynamoDBLambda = new aws.lambda.Function("bookingDynamo", {
+  code: new pulumi.asset.FileArchive("../booking/server/dist/function.zip"),
+  role: iamForLambda.arn,
+  handler: "index.handler",
+  runtime: aws.lambda.NodeJS12dXRuntime,
+  environment: {
+      variables: {
+        DB_TYPE: "dynamodb",
+      },
+  },
+
+  vpcConfig: {
+    securityGroupIds: [lambdaSG.id],
+    subnetIds: defaultSubnets.map(s => s.id)
+  }
+});
+
 const bookingAPIGateway = new aws.apigatewayv2.Api("booking", {
   protocolType: "HTTP",
 });
-
 const stage = new aws.apigatewayv2.Stage("default", {name: "$default", apiId: bookingAPIGateway.id, autoDeploy: true});
 const bookingAPILambdaIntegration = new aws.apigatewayv2.Integration("booking", {
   apiId: bookingAPIGateway.id,
@@ -224,6 +243,34 @@ const bookingLambdaPermission = new aws.lambda.Permission("bookingLambdaPermissi
   action: "lambda:InvokeFunction",
   function: bookingLambda.id,
   principal: "apigateway.amazonaws.com",
-  sourceArn: pulumi.interpolate`${bookingAPIGateway.executionArn}/*/*/*`,
+  sourceArn: pulumi.interpolate`${bookingAPIGateway.executionArn}/*/$default`,
+});
+
+
+const bookingDynamoAPIGateway = new aws.apigatewayv2.Api("bookingDynamo", {
+  protocolType: "HTTP",
+});
+const stageBookingDynamo = new aws.apigatewayv2.Stage("bookingDynamo-default", {name: "$default", apiId: bookingDynamoAPIGateway.id, autoDeploy: true});
+const bookingDynamoAPILambdaIntegration = new aws.apigatewayv2.Integration("bookingDynamo", {
+  apiId: bookingDynamoAPIGateway.id,
+  integrationType: "AWS_PROXY",
+  connectionType: "INTERNET",
+  integrationMethod: "POST",
+  integrationUri: bookingWithDynamoDBLambda.invokeArn,
+  passthroughBehavior: "WHEN_NO_MATCH",
+  payloadFormatVersion: "2.0",
+});
+const bookingDynamoAPIRoute = new aws.apigatewayv2.Route("bookingDynamo", {
+  apiId: bookingDynamoAPIGateway.id,
+  routeKey: "$default",
+  target: pulumi.interpolate`integrations/${bookingDynamoAPILambdaIntegration.id}`
+});
+export const bookingDynamoURL = stageBookingDynamo.invokeUrl
+
+const bookingDynamoLambdaPermission = new aws.lambda.Permission("bookingDynamoLambdaPermission", {
+  action: "lambda:InvokeFunction",
+  function: bookingWithDynamoDBLambda.id,
+  principal: "apigateway.amazonaws.com",
+  sourceArn: pulumi.interpolate`${bookingDynamoAPIGateway.executionArn}/*/$default`,
 });
 
