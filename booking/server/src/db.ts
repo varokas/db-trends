@@ -28,7 +28,7 @@ export interface DBBooking {
 }
 
 export interface DBBookingResult {
-  id: number
+  id?: number
   round: string
   seat: string
   owner?: string
@@ -96,7 +96,6 @@ export class MysqlDB implements DB {
 
   async newRound(newRoundId: string, codes: string[]):Promise<void> {
     var insertParams = _.zip(Array(codes.length).fill(newRoundId), codes)
-
     await this.#execute(async (conn) => {
     await conn.query(`REPLACE INTO config(k,v) VALUES ('round','${newRoundId}')`)
     await conn.batch("INSERT INTO booking(round, seat) VALUES (?, ?)", insertParams)
@@ -106,7 +105,7 @@ export class MysqlDB implements DB {
   async getCurrentRound(): Promise<string> {
     var roundResult:DBConfig[] = await this.#executeQuery("SELECT * FROM config where k = 'round'")
     if (roundResult.length == 0) {
-    throw new Error("No current round")
+      throw new Error("No current round")
     }
 
     return roundResult[0]["v"] 
@@ -208,40 +207,210 @@ export class DynamoDB implements DB {
         }).promise()
       )
     }
-    
+    if(!tableNames.has("Booking")) {
+      // Table Schema
+      // pk: seat - Hopefully properly distributed by nature
+      // sk: round_id
+      // value: {user:count}
+      // seat: [round_id]#[seat_id] - We treat round like version here. This will allow us to query by user, round easily
+      console.log("Createing Booking Table")
+      createTablePromises.push(
+        this.dynamodb.createTable({
+          TableName : "Booking",
+          KeySchema: [       
+              { AttributeName: "Seat", KeyType: "HASH" },
+              { AttributeName: "Round", KeyType: "RANGE" },
+          ],
+          AttributeDefinitions: [
+              { AttributeName: "Seat", AttributeType: "S" },
+              { AttributeName: "Round", AttributeType: "S" },
+          ],
+          ProvisionedThroughput: {
+            // This is ignored in local development
+            ReadCapacityUnits: 100,
+            WriteCapacityUnits: 100
+          },
+          BillingMode: "PAY_PER_REQUEST",
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: 'RoundIndex',
+              KeySchema: [
+                { KeyType: "HASH", AttributeName: "Round" },
+                { KeyType: "RANGE", AttributeName: "Seat" }
+              ],
+              Projection: {
+                ProjectionType: "ALL"
+              },
+              ProvisionedThroughput: {
+                WriteCapacityUnits: 10,
+                ReadCapacityUnits: 10
+              },
+            }
+          ]
+        }).promise()
+      )
+    }
     return Promise.all(createTablePromises)
   }
 
   async newRound(newRoundId: string, codes: string[]): Promise<void> {
+    // Create New Round
     await this.docClient.put({
       TableName: "Config",
       Item: {"key": "round", "value": newRoundId}
     }).promise()
+
+    const batchWritePromises:Promise<AWS.DynamoDB.Types.BatchWriteItemOutput>[] = []
+    // DynamoDB doesn't like too big batch (~25 put)
+    const chunkCodes = _.chunk(codes, 20)
+    chunkCodes.forEach(codeSubset => {
+      const params = {
+        RequestItems: {
+          "Booking": codeSubset.map(code => {
+            return {
+              PutRequest: {
+                Item: {
+                  "Seat": code,
+                  "Round": newRoundId,
+                  "ReservationCounter": 0
+                }
+              }
+            }
+          })
+        }
+      }
+      batchWritePromises.push(this.docClient.batchWrite(params).promise())
+    })
+    // TODO - Handle Unprocessed Items
+    Promise.all(batchWritePromises)
+    .then(res => console.log(`New Round Response ${JSON.stringify(res)}`))
+    .catch(ex => console.error(`ERROR: ${ex}`))
   }
+
   async getCurrentRound(): Promise<string> {
+    // Get Current Round ID
     const data = await this.docClient.get({
       TableName: "Config",
       Key: {"key": "round"}
     }).promise()
 
-    if (data.Item) {
-      console.log(data.Item)
-      return data.Item["value"]
+    if (!data.Item) {
+      throw new Error("No current round")
     }
 
-    return "unknown"
-  }
-  makeBookings(round: string, bookings: DBBooking[]): Promise<DBMakeBookingResult[]> {
-    throw new Error("Method not implemented.");
-  }
-  getBookings(round: string): Promise<DBBookingResult[]> {
-    throw new Error("Method not implemented.");
-  }
-  getBooked(round: string): Promise<DBBookingResult[]> {
-    throw new Error("Method not implemented.");
-  }
-  getOwners(round: string): Promise<DBOwnerResult[]> {
-    throw new Error("Method not implemented.");
+    return data.Item["value"]
   }
 
+  
+  async makeBookings(round: string, bookings: DBBooking[]): Promise<DBMakeBookingResult[]> {
+    // Update Seat in the round with the owner if the counter value is highest for the owner
+    const batchGetParams = {
+      RequestItems: {
+        "Booking": {
+          Keys: bookings.map(booking => ({"Seat": booking.seat, "Round": round}))
+        }
+      }
+    }
+    const data = await this.docClient.batchGet(batchGetParams).promise()
+    const currentBookingBySeat = _.keyBy(data.Responses?.Booking, b => b.Seat)
+    const batchUpdateItems: AWS.DynamoDB.PutRequest[] = []
+    // Dynamo Put won't get us any updated output - ref https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
+    const makeBookingResult: DBMakeBookingResult[] = []
+    bookings.forEach(booking => {
+      const currentBooking = currentBookingBySeat[booking.seat]
+      if(!currentBooking.SeatOwner || booking.counter > currentBooking.ReservationCounter) {
+        const item = <AWS.DynamoDB.PutRequest>{
+            Item: {
+              "Seat": booking.seat,
+              "Round": round,
+              "SeatOwner": booking.owner,
+              "ReservationCounter": booking.counter
+            }
+          }
+        batchUpdateItems.push(item)
+        makeBookingResult.push({
+          round: round,
+          seat: booking.seat,
+          owner: booking.owner,
+          counter: currentBooking.ReservationCounter || 0,
+          newCounter: booking.counter
+        })
+      }
+    })
+
+    const batchWritePromises:Promise<AWS.DynamoDB.Types.BatchWriteItemOutput>[] = []
+    // DynamoDB doesn't like too big batch (~25 put)
+    const chunkCodes = _.chunk(batchUpdateItems, 20)
+    chunkCodes.forEach(chunk => {
+      const params = {
+        RequestItems: {
+          "Booking": chunk.map(putReqItem => ({PutRequest: putReqItem}))
+        },
+      }
+      batchWritePromises.push(this.docClient.batchWrite(params).promise())
+    })
+    // TODO - Handle Unprocessed Items
+    Promise.all(batchWritePromises)
+    .then(res => console.log(`Response ${JSON.stringify(res)}`))
+    .catch(ex => console.error(`ERROR: ${ex}`))
+    return makeBookingResult
+  }
+  async getBookings(round: string): Promise<DBBookingResult[]> {
+    // Get All Bookings By Round
+    const params = {
+      TableName : "Booking",
+      IndexName: "RoundIndex",
+      KeyConditionExpression: "Round = :round_value",
+      ExpressionAttributeValues: {
+          ":round_value": round
+      }
+    }
+    const data = await this.docClient.query(params).promise()
+    if (!data.Items) {
+      throw new Error("Data Not Found");
+    }
+
+    const output = data.Items.map(item => <DBBookingResult>{
+      round: item.Round,
+      seat: item.Seat,
+      owner: item.SeatOwner ||  "",
+      counter: item.ReservationCounter || 0,
+    })
+    return output
+  }
+  async getBooked(round: string): Promise<DBBookingResult[]> {
+    // Get all booked seat in the round
+    const params = {
+      TableName : "Booking",
+      IndexName: "RoundIndex",
+      KeyConditionExpression: "Round = :round_value",
+      FilterExpression: "attribute_exists(SeatOwner)",
+      ExpressionAttributeValues: {
+          ":round_value": round
+      }
+    }
+    const data = await this.docClient.query(params).promise()
+    if (!data.Items) {
+      throw new Error("Data Not Found");
+    }
+    const output = data.Items.map(item => <DBBookingResult>{
+      round: item.Round,
+      seat: item.Seat,
+      owner: item.SeatOwner,
+      counter: item.ReservationCounter,
+    })
+    return output
+  }
+
+  async getOwners(round: string): Promise<DBOwnerResult[]> {
+    // Get count by owner
+    // Scan by Round
+    const bookedSeat = await this.getBooked(round)
+    // Group By Owner
+    const countByOwner = _.countBy(bookedSeat, item => item.owner)
+    const result: DBOwnerResult[] = []
+    _.forIn(countByOwner, (counts, owner) => result.push({ owner, counts }));
+    // const _.forIn(countByOwner, (count, owner) => result.push({ owner, counter: count }));
+    return _.sortBy(result, r => -r.counts)
+  }
 }

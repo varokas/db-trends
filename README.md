@@ -21,7 +21,7 @@ docker-compose up
 Before doing anything we need to create a new 'round' first. 
 
 ```
-$ curl -X POST localhost:3000/api/newRound
+$ curl -d "rows=10&cols=10" -X POST localhost:3000/api/newRound
 {"roundId":"xDR31zsiQc","seats":100}
 ```
 

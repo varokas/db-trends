@@ -83,10 +83,13 @@ api.post('/api/newRound', async (req, res) => {
   }
  
   const newId = nanoid(10)
-
+  
   var rowCodes = _.range(rows).map(i => String.fromCharCode(65 + i))
   var colCodes = _.range(cols)
 
+  // codes will be the following format
+  // A0000, A0001, A0003, ...
+  // B0000, B0001, B0003, ...
   var codes = rowCodes.flatMap(r => colCodes.map(c => `${r}${c.toString().padStart(4, '0')}`))
 
   await db.newRound(newId, codes)
