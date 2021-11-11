@@ -225,11 +225,6 @@ export class DynamoDB implements DB {
               { AttributeName: "Seat", AttributeType: "S" },
               { AttributeName: "Round", AttributeType: "S" },
           ],
-          ProvisionedThroughput: {
-            // This is ignored in local development
-            ReadCapacityUnits: 100,
-            WriteCapacityUnits: 100
-          },
           BillingMode: "PAY_PER_REQUEST",
           GlobalSecondaryIndexes: [
             {
@@ -240,10 +235,6 @@ export class DynamoDB implements DB {
               ],
               Projection: {
                 ProjectionType: "ALL"
-              },
-              ProvisionedThroughput: {
-                WriteCapacityUnits: 10,
-                ReadCapacityUnits: 10
               },
             }
           ]
