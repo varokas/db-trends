@@ -130,7 +130,7 @@ export const App = () => {
           console.error('fail loading board', err);
           setLoadingSeats(false);
           setLoadingSeatsError(err.response.status + ' ' + err.response.data)
-          //alert('Fail loading territories: ' + err.response.status + ' ' + err.response.data);
+          alert('Fail loading territories: ' + err.response.status + ' ' + err.response.data);
         });
     },
     [],
@@ -150,7 +150,7 @@ export const App = () => {
             console.error('fail loading leader board', err);
             setLoadingOwners(false);
             setLoadingOwnersError(err.response.status + ' ' + err.response.data);
-            //alert('Fail loading leader board: ' + err.response.status + ' ' + err.response.data);
+            alert('Fail loading leader board: ' + err.response.status + ' ' + err.response.data);
           });
       }
     };
