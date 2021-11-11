@@ -12,7 +12,7 @@ const range = (n:Number) => [...Array(n).keys()]
 const region = "us-west-2"
 const azs = ["a","b","c","d"].map(az => `${region}${az}`)
 
-const locustEC2Size = "t4g.nano";     // t2.micro is available in the AWS free tier
+const locustEC2Size = "t4g.small";     // t2.micro is available in the AWS free tier
 const arch = "arm64" //x86_64
 const locustServersCount = 1
 
@@ -41,14 +41,14 @@ new aws.iam.GroupPolicyAttachment("admins", {
 });
 
 // EIPs & DNS
-// const locustIPs = range(locustServersCount).map( i => new aws.ec2.Eip(`locust-${i}`));
-// const locustRecords = range(locustServersCount).map( i => new cloudflare.Record(`locust-${i}`, {
-//   name: `locust-${i}`,
-//   zoneId: "b52117ad37fcc6bf9077251553d7d9d8",
-//   type: "A",
-//   value: locustIPs[i].publicIp,
-//   ttl: 3600
-// }))
+const locustIPs = range(locustServersCount).map( i => new aws.ec2.Eip(`locust-${i}`));
+const locustRecords = range(locustServersCount).map( i => new cloudflare.Record(`locust-${i}`, {
+  name: `locust-${i}`,
+  zoneId: "b52117ad37fcc6bf9077251553d7d9d8",
+  type: "A",
+  value: locustIPs[i].publicIp,
+  ttl: 3600
+}))
 
 const redisDemoEIP = new aws.ec2.Eip(`redisDemoIP`)
 new cloudflare.Record(`redisDemoIP`, {
@@ -120,25 +120,25 @@ const ami = pulumi.output(aws.ec2.getAmi({
     mostRecent: true,
 }));
 
-// const locustEC2s = range(locustServersCount).map( i => new aws.ec2.Instance(`locust-${i}`, {
-//   instanceType: locustEC2Size,
-//   vpcSecurityGroupIds: [ ec2SG.id ], // reference the security group resource above
-//   ami: ami.id,
-//   tags: {
-//         Name: `Locust-${i}`,
-//   },
-//   keyName: dbTrendsPubKey.keyName,
-//   associatePublicIpAddress: true,
-//   userData: `#!/bin/bash
-//   pip3 install locust
-//   `
-// }))
-// export const locustEC2Hosts = locustEC2s.map( l => l.publicIp )
+const locustEC2s = range(locustServersCount).map( i => new aws.ec2.Instance(`locust-${i}`, {
+  instanceType: locustEC2Size,
+  vpcSecurityGroupIds: [ ec2SG.id ], // reference the security group resource above
+  ami: ami.id,
+  tags: {
+        Name: `Locust-${i}`,
+  },
+  keyName: dbTrendsPubKey.keyName,
+  associatePublicIpAddress: true,
+  userData: `#!/bin/bash
+  pip3 install locust
+  `
+}))
+export const locustEC2Hosts = locustEC2s.map( l => l.publicIp )
 
-// const locustEIPAssocs = range(locustServersCount).map( i => new aws.ec2.EipAssociation(`eipAssoc-locust-${i}`, {
-//   instanceId: locustEC2s[i].id,
-//   allocationId: locustIPs[i].id,
-// }))
+const locustEIPAssocs = range(locustServersCount).map( i => new aws.ec2.EipAssociation(`eipAssoc-locust-${i}`, {
+  instanceId: locustEC2s[i].id,
+  allocationId: locustIPs[i].id,
+}))
 
 const redisDemoEC2 = new aws.ec2.Instance(`redis-demo`, {
   instanceType: redisDemoEC2Size,
