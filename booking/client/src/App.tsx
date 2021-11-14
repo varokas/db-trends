@@ -199,6 +199,7 @@ export const App = () => {
           getBooking();
         }, reason => {
           console.log('fail', reason);
+          alert('Fail Submitting Scores: ' + reason);
           getBooking();
         });
       }
