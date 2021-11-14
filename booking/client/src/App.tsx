@@ -29,7 +29,7 @@ const rowStyle = {
   display: 'flex',
   flexDirection: 'row' as const,
   flexWrap: 'wrap' as const,
-  marginBottom: '50px',
+  marginBottom: '5px',
   width: '60vw'
 }
 
