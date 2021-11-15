@@ -286,6 +286,7 @@ export class DynamoDB implements DB {
     }).promise()
 
     if (!data.Item) {
+      console.error("No Current Round Found")
       throw new Error("No current round")
     }
 
@@ -359,6 +360,7 @@ export class DynamoDB implements DB {
     const data = await this.docClient.query(params).promise()
     if (!data.Items) {
       throw new Error("Data Not Found");
+      console.error(`No Data Found for getBookings. Params ${JSON.stringify(params)}`)
     }
 
     const output = data.Items.map(item => <DBBookingResult>{
@@ -382,6 +384,7 @@ export class DynamoDB implements DB {
     }
     const data = await this.docClient.query(params).promise()
     if (!data.Items) {
+      console.error(`No Data Found for getBooked. Params ${JSON.stringify(params)}`)
       throw new Error("Data Not Found");
     }
     const output = data.Items.map(item => <DBBookingResult>{
